@@ -1,12 +1,11 @@
 let currentProjectId = null;
+let projects;
 
-if (typeof projects === 'undefined') {
-    try {
-        var projects = JSON.parse(localStorage.getItem('projects')) || [];
-    } catch (error) {
-        console.error("Error loading projects from localStorage:", error);
-        var projects = [];
-    }
+try {
+    projects = JSON.parse(localStorage.getItem('projects')) || [];
+} catch (error) {
+    console.error("Error loading projects from localStorage:", error);
+    projects = [];
 }
 
 document.addEventListener('DOMContentLoaded', () => {
