@@ -13,33 +13,49 @@ function saveProjects() {
 
 function loadProjects() {
     const projectList = document.getElementById('projectList');
-    projectList.innerHTML = projects.map(project => `
-        <li class="project-item" onclick="selectProject(${project.id})">
-            <span ondblclick="editProject(${project.id})">${project.name}</span>
-            <button class="add-board-btn" data-project-id="${project.id}">+ Add Board</button>
-            <ul class="board-list" id="boards-${project.id}">
-                ${project.boards.map(board => `
-                    <li class="board-item" onclick="selectBoard(event, ${project.id}, ${board.id})">
-                        <span ondblclick="editBoard(${project.id}, ${board.id})">${board.name}</span>
-                    </li>
-                `).join('')}
-            </ul>
-        </li>
-    `).join('');
-    saveProjects();
-    document.querySelectorAll('.add-board-btn').forEach(button => {
-        button.addEventListener('click', function(event) {
+    projectList.innerHTML = '';
+    projects.forEach(project => {
+        const projectItem = document.createElement('li');
+        projectItem.classList.add('project-item');
+        projectItem.textContent = project.name;
+        projectItem.onclick = () => selectProject(project.id);
+        projectItem.ondblclick = () => editProject(project.id);
+
+        const addBoardBtn = document.createElement('button');
+        addBoardBtn.textContent = '+ Add Board';
+        addBoardBtn.onclick = (event) => {
             event.stopPropagation();
-            addBoard(parseInt(button.getAttribute('data-project-id')));
+            addBoard(project.id);
+        };
+        projectItem.appendChild(addBoardBtn);
+
+        const boardList = document.createElement('ul');
+        boardList.classList.add('board-list');
+        boardList.id = `boards-${project.id}`;
+
+        project.boards.forEach(board => {
+            const boardItem = document.createElement('li');
+            boardItem.classList.add('board-item');
+            boardItem.textContent = board.name;
+            boardItem.onclick = (event) => {
+                event.stopPropagation();
+                selectBoard(project.id, board.id);
+            };
+            boardItem.ondblclick = () => editBoard(project.id, board.id);
+            boardList.appendChild(boardItem);
         });
+
+        projectItem.appendChild(boardList);
+        projectList.appendChild(projectItem);
     });
+    saveProjects();
 }
 
 function selectProject(projectId) {
     currentProjectId = projectId;
     document.querySelectorAll('.project-item').forEach(item => item.classList.remove('active'));
-    document.querySelector(`.project-item[onclick='selectProject(${projectId})']`).classList.add('active');
-    loadBoards(projects.find(p => p.id == projectId).boards, projectId);
+    document.querySelector(`.project-item:nth-child(${projects.findIndex(p => p.id === projectId) + 1})`).classList.add('active');
+    loadProjects();
 }
 
 function addProject() {
