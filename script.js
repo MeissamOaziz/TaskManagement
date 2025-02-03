@@ -1,4 +1,3 @@
-let currentProjectId = null;
 let projects = JSON.parse(localStorage.getItem('projects')) || [];
 
 document.addEventListener('DOMContentLoaded', () => {
