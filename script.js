@@ -1,4 +1,5 @@
 let currentProjectId = null;
+let currentBoardId = null;
 
 // Ensure 'projects' is only declared once
 if (!window.projects) {
@@ -25,10 +26,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
     if (addTaskBtn) addTaskBtn.addEventListener('click', () => {
-        if (currentProjectId) {
+        if (currentProjectId && currentBoardId) {
             addTask();
         } else {
-            alert("Please select a project first.");
+            alert("Please select a board first.");
         }
     });
     
@@ -92,9 +93,16 @@ function loadProjects() {
 function selectProject(projectId) {
     console.log("Selected project ID:", projectId);
     currentProjectId = projectId;
+    currentBoardId = null;
     document.querySelectorAll('.project-item').forEach(item => item.classList.remove('active'));
     document.querySelector(`.project-item:nth-child(${window.projects.findIndex(p => p.id === projectId) + 1})`).classList.add('active');
     loadProjects();
+}
+
+function selectBoard(projectId, boardId) {
+    console.log("Selected board ID:", boardId);
+    currentProjectId = projectId;
+    currentBoardId = boardId;
 }
 
 function addProject() {
@@ -122,7 +130,8 @@ function addBoard(projectId) {
     if (boardName) {
         const project = window.projects.find(p => p.id == projectId);
         if (project) {
-            project.boards.push({ id: Date.now(), name: boardName, tasks: [] });
+            const newBoard = { id: Date.now(), name: boardName, tasks: [] };
+            project.boards.push(newBoard);
             loadProjects();
         }
     }
@@ -139,16 +148,17 @@ function editBoard(projectId, boardId) {
 }
 
 function addTask() {
-    console.log("Adding task to project ID:", currentProjectId);
-    if (!currentProjectId) {
-        alert("Select a project first.");
+    console.log("Adding task to board ID:", currentBoardId);
+    if (!currentProjectId || !currentBoardId) {
+        alert("Select a project and board first.");
         return;
     }
     const taskName = prompt("Enter task name:");
     if (taskName) {
         const project = window.projects.find(p => p.id == currentProjectId);
-        if (project && project.boards.length > 0) {
-            project.boards[0].tasks.push({ id: Date.now(), name: taskName });
+        const board = project.boards.find(b => b.id == currentBoardId);
+        if (board) {
+            board.tasks.push({ id: Date.now(), name: taskName });
             loadProjects();
         }
     }
