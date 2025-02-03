@@ -1,11 +1,13 @@
 let currentProjectId = null;
-let projects;
 
-try {
-    projects = JSON.parse(localStorage.getItem('projects')) || [];
-} catch (error) {
-    console.error("Error loading projects from localStorage:", error);
-    projects = [];
+// Ensure 'projects' is only declared once
+if (!window.projects) {
+    try {
+        window.projects = JSON.parse(localStorage.getItem('projects')) || [];
+    } catch (error) {
+        console.error("Error loading projects from localStorage:", error);
+        window.projects = [];
+    }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -35,7 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function saveProjects() {
     try {
-        localStorage.setItem('projects', JSON.stringify(projects));
+        localStorage.setItem('projects', JSON.stringify(window.projects));
     } catch (error) {
         console.error("Error saving projects to localStorage:", error);
     }
@@ -47,7 +49,7 @@ function loadProjects() {
     if (!projectList) return;
     
     projectList.innerHTML = '';
-    projects.forEach(project => {
+    window.projects.forEach(project => {
         console.log("Project found:", project.name);
         const projectItem = document.createElement('li');
         projectItem.classList.add('project-item');
@@ -91,7 +93,7 @@ function selectProject(projectId) {
     console.log("Selected project ID:", projectId);
     currentProjectId = projectId;
     document.querySelectorAll('.project-item').forEach(item => item.classList.remove('active'));
-    document.querySelector(`.project-item:nth-child(${projects.findIndex(p => p.id === projectId) + 1})`).classList.add('active');
+    document.querySelector(`.project-item:nth-child(${window.projects.findIndex(p => p.id === projectId) + 1})`).classList.add('active');
     loadProjects();
 }
 
@@ -100,13 +102,13 @@ function addProject() {
     const projectName = prompt("Enter project name:");
     if (projectName) {
         const newProject = { id: Date.now(), name: projectName, boards: [] };
-        projects.push(newProject);
+        window.projects.push(newProject);
         loadProjects();
     }
 }
 
 function editProject(projectId) {
-    const project = projects.find(p => p.id == projectId);
+    const project = window.projects.find(p => p.id == projectId);
     const newName = prompt("Enter new project name:", project.name);
     if (newName) {
         project.name = newName;
@@ -118,7 +120,7 @@ function addBoard(projectId) {
     console.log("Adding board to project ID:", projectId);
     const boardName = prompt("Enter board name:");
     if (boardName) {
-        const project = projects.find(p => p.id == projectId);
+        const project = window.projects.find(p => p.id == projectId);
         if (project) {
             project.boards.push({ id: Date.now(), name: boardName, tasks: [] });
             loadProjects();
@@ -127,7 +129,7 @@ function addBoard(projectId) {
 }
 
 function editBoard(projectId, boardId) {
-    const project = projects.find(p => p.id == projectId);
+    const project = window.projects.find(p => p.id == projectId);
     const board = project.boards.find(b => b.id == boardId);
     const newName = prompt("Enter new board name:", board.name);
     if (newName) {
@@ -144,7 +146,7 @@ function addTask() {
     }
     const taskName = prompt("Enter task name:");
     if (taskName) {
-        const project = projects.find(p => p.id == currentProjectId);
+        const project = window.projects.find(p => p.id == currentProjectId);
         if (project && project.boards.length > 0) {
             project.boards[0].tasks.push({ id: Date.now(), name: taskName });
             loadProjects();
