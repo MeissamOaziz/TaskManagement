@@ -3,39 +3,46 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Advanced Task Board</title>
+    <title>Task Management Platform</title>
     <link rel="stylesheet" href="Styles.css">
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 </head>
 <body>
-    <div class="container">
-        <!-- Project Selection -->
-        <div class="project-selector">
-            <h1>Projects</h1>
-            <select id="projectSelect" onchange="loadProject()"></select>
-            <button onclick="addProject()">Add Project</button>
-            <button onclick="renameProject()">Rename Project</button>
-            <button onclick="deleteProject()">Delete Project</button>
-        </div>
-
-        <!-- Board and Task Management -->
-        <div class="board-management">
-            <h2>Boards</h2>
-            <div class="boards" id="boards"></div>
-            <button onclick="addBoard()">Add Board</button>
-        </div>
-
-        <!-- Task Management -->
-        <div class="task-management">
-            <h2>Tasks</h2>
-            <div class="add-task">
-                <input type="text" id="taskInput" placeholder="New task...">
-                <button onclick="addTask()">Add Task</button>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <h2>Projects</h2>
+            <button class="add-btn" onclick="addProject()">+ Add Project</button>
+            <ul id="projectList"></ul>
+        </aside>
+        
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="board-header">
+                <h2 id="selectedProjectName">Select a Project</h2>
+                <button class="add-btn" onclick="addBoard()">+ Add Board</button>
             </div>
-            <div class="tasks" id="tasks"></div>
-        </div>
+            <div class="board-container" id="boards"></div>
+            
+            <!-- Task Section -->
+            <h2>Tasks</h2>
+            <button class="add-btn" onclick="addTask()">+ Add Task</button>
+            <table class="task-table">
+                <thead>
+                    <tr>
+                        <th>Task</th>
+                        <th>Start Date</th>
+                        <th>End Date</th>
+                        <th>Progress</th>
+                        <th>Files</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="tasks"></tbody>
+            </table>
+        </main>
     </div>
-
+    
     <script src="data.js"></script>
     <script src="script.js"></script>
 </body>
