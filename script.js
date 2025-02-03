@@ -98,20 +98,48 @@ function loadBoards() {
     if (!project) return;
     
     project.boards.forEach(board => {
+        const boardElement = document.createElement('div');
+        boardElement.classList.add('board-view');
+        boardElement.innerHTML = `<h3>${board.name}</h3>`;
+        
         if (board.id === currentBoardId) {
-            const boardElement = document.createElement('div');
-            boardElement.classList.add('board-view');
-            boardElement.innerHTML = `<h3>${board.name}</h3>`;
-            const taskList = document.createElement('ul');
-            board.tasks.forEach(task => {
-                const taskItem = document.createElement('li');
-                taskItem.textContent = task.name;
-                taskList.appendChild(taskItem);
-            });
-            boardElement.appendChild(taskList);
-            boardsContainer.appendChild(boardElement);
+            boardElement.classList.add('active');
         }
+        
+        const taskList = document.createElement('ul');
+        board.tasks.forEach(task => {
+            const taskItem = document.createElement('li');
+            taskItem.textContent = task.name;
+            taskList.appendChild(taskItem);
+        });
+        boardElement.appendChild(taskList);
+        boardsContainer.appendChild(boardElement);
     });
+}
+
+function addProject() {
+    console.log("Adding new project...");
+    const projectName = prompt("Enter project name:");
+    if (projectName) {
+        const newProject = { id: Date.now(), name: projectName, boards: [] };
+        window.projects.push(newProject);
+        saveProjects();
+        loadProjects();
+    }
+}
+
+function addBoard(projectId) {
+    console.log("Adding board to project ID:", projectId);
+    const boardName = prompt("Enter board name:");
+    if (boardName) {
+        const project = window.projects.find(p => p.id == projectId);
+        if (project) {
+            const newBoard = { id: Date.now(), name: boardName, tasks: [] };
+            project.boards.push(newBoard);
+            saveProjects();
+            loadProjects();
+        }
+    }
 }
 
 function selectProject(projectId) {
@@ -140,7 +168,8 @@ function addTask() {
         const board = project.boards.find(b => b.id == currentBoardId);
         if (board) {
             board.tasks.push({ id: Date.now(), name: taskName });
-            loadProjects();
+            saveProjects();
+            loadBoards();
         }
     }
 }
