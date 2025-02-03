@@ -1,33 +1,51 @@
 let currentProjectId = null;
-let projects = JSON.parse(localStorage.getItem('projects')) || [];
+let projects;
+
+try {
+    projects = JSON.parse(localStorage.getItem('projects')) || [];
+} catch (error) {
+    console.error("Error loading projects from localStorage:", error);
+    projects = [];
+}
 
 document.addEventListener('DOMContentLoaded', () => {
     console.log("Script loaded successfully");
-    document.getElementById('addProjectBtn').addEventListener('click', addProject);
-    document.getElementById('addBoardBtn').addEventListener('click', () => {
+    const addProjectBtn = document.getElementById('addProjectBtn');
+    const addBoardBtn = document.getElementById('addBoardBtn');
+    const addTaskBtn = document.getElementById('addTaskBtn');
+
+    if (addProjectBtn) addProjectBtn.addEventListener('click', addProject);
+    if (addBoardBtn) addBoardBtn.addEventListener('click', () => {
         if (currentProjectId) {
             addBoard(currentProjectId);
         } else {
             alert("Please select a project first.");
         }
     });
-    document.getElementById('addTaskBtn').addEventListener('click', () => {
+    if (addTaskBtn) addTaskBtn.addEventListener('click', () => {
         if (currentProjectId) {
             addTask();
         } else {
             alert("Please select a project first.");
         }
     });
+    
     loadProjects();
 });
 
 function saveProjects() {
-    localStorage.setItem('projects', JSON.stringify(projects));
+    try {
+        localStorage.setItem('projects', JSON.stringify(projects));
+    } catch (error) {
+        console.error("Error saving projects to localStorage:", error);
+    }
 }
 
 function loadProjects() {
     console.log("Loading projects...");
     const projectList = document.getElementById('projectList');
+    if (!projectList) return;
+    
     projectList.innerHTML = '';
     projects.forEach(project => {
         console.log("Project found:", project.name);
