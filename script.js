@@ -1,8 +1,22 @@
+let currentProjectId = null;
 let projects = JSON.parse(localStorage.getItem('projects')) || [];
 
 document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('addProjectBtn').addEventListener('click', addProject);
-    document.getElementById('addTaskBtn').addEventListener('click', addTask);
+    document.getElementById('addBoardBtn').addEventListener('click', () => {
+        if (currentProjectId) {
+            addBoard(currentProjectId);
+        } else {
+            alert("Please select a project first.");
+        }
+    });
+    document.getElementById('addTaskBtn').addEventListener('click', () => {
+        if (currentProjectId) {
+            addTask();
+        } else {
+            alert("Please select a project first.");
+        }
+    });
     loadProjects();
 });
 
@@ -23,7 +37,6 @@ function loadProjects() {
         const addBoardBtn = document.createElement('button');
         addBoardBtn.textContent = '+ Add Board';
         addBoardBtn.classList.add('add-board-btn');
-        addBoardBtn.dataset.projectId = project.id;
         addBoardBtn.addEventListener('click', (event) => {
             event.stopPropagation();
             addBoard(project.id);
