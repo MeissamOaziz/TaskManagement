@@ -12,7 +12,7 @@
         <!-- Sidebar Navigation -->
         <aside class="sidebar">
             <h2>Projects</h2>
-            <button class="add-btn" onclick="addProject()">+ Add Project</button>
+            <button id="addProjectBtn" class="add-btn">+ Add Project</button>
             <ul id="projectList"></ul>
         </aside>
         
@@ -20,13 +20,13 @@
         <main class="main-content">
             <div class="board-header">
                 <h2 id="selectedProjectName">Select a Project</h2>
-                <button class="add-btn" onclick="addBoard()">+ Add Board</button>
+                <button id="addBoardBtn" class="add-btn">+ Add Board</button>
             </div>
             <div class="board-container" id="boards"></div>
             
             <!-- Task Section -->
             <h2>Tasks</h2>
-            <button class="add-btn" onclick="addTask()">+ Add Task</button>
+            <button id="addTaskBtn" class="add-btn">+ Add Task</button>
             <table class="task-table">
                 <thead>
                     <tr>
