@@ -4,6 +4,7 @@ let projects = JSON.parse(localStorage.getItem('projects')) || [];
 document.addEventListener('DOMContentLoaded', () => {
     loadProjects();
     document.getElementById('addProjectBtn').addEventListener('click', addProject);
+    document.getElementById('addTaskBtn').addEventListener('click', addTask);
 });
 
 function saveProjects() {
@@ -15,6 +16,7 @@ function loadProjects() {
     projectList.innerHTML = projects.map(project => `
         <li class="project-item" onclick="selectProject(${project.id})">
             <span ondblclick="editProject(${project.id})">${project.name}</span>
+            <button class="add-board-btn" data-project-id="${project.id}">+ Add Board</button>
             <ul class="board-list" id="boards-${project.id}">
                 ${project.boards.map(board => `
                     <li class="board-item" onclick="selectBoard(event, ${project.id}, ${board.id})">
@@ -22,10 +24,15 @@ function loadProjects() {
                     </li>
                 `).join('')}
             </ul>
-            <button class="add-board-btn" onclick="addBoard(${project.id})">+ Add Board</button>
         </li>
     `).join('');
     saveProjects();
+    document.querySelectorAll('.add-board-btn').forEach(button => {
+        button.addEventListener('click', function(event) {
+            event.stopPropagation();
+            addBoard(parseInt(button.getAttribute('data-project-id')));
+        });
+    });
 }
 
 function selectProject(projectId) {
@@ -43,13 +50,6 @@ function addProject() {
         loadProjects();
     }
 }
-
-document.addEventListener('click', function(event) {
-    if (event.target.classList.contains('add-board-btn')) {
-        const projectId = event.target.getAttribute('onclick').match(/\d+/)[0];
-        addBoard(Number(projectId));
-    }
-});
 
 function editProject(projectId) {
     const project = projects.find(p => p.id == projectId);
