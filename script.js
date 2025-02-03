@@ -3,6 +3,7 @@ let projects = JSON.parse(localStorage.getItem('projects')) || [];
 
 document.addEventListener('DOMContentLoaded', () => {
     loadProjects();
+    document.getElementById('addProjectBtn').addEventListener('click', addProject);
 });
 
 function saveProjects() {
@@ -42,6 +43,13 @@ function addProject() {
         loadProjects();
     }
 }
+
+document.addEventListener('click', function(event) {
+    if (event.target.classList.contains('add-board-btn')) {
+        const projectId = event.target.getAttribute('onclick').match(/\d+/)[0];
+        addBoard(Number(projectId));
+    }
+});
 
 function editProject(projectId) {
     const project = projects.find(p => p.id == projectId);
