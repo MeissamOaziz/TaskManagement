@@ -1,4 +1,5 @@
 let currentProjectId = null;
+let currentBoardId = null;
 
 // Load Projects into Dropdown
 function loadProjects() {
@@ -27,8 +28,60 @@ function loadBoards(boards) {
             <h3>${board.name}</h3>
             <button onclick="editBoard(${board.id})">Edit</button>
             <button onclick="deleteBoard(${board.id})">Delete</button>
+            <button onclick="setCurrentBoard(${board.id})">View Tasks</button>
         </div>
     `).join('');
+}
+
+// Set Current Board
+function setCurrentBoard(boardId) {
+    currentBoardId = boardId;
+    const project = projects.find(p => p.id == currentProjectId);
+    if (project) {
+        const board = project.boards.find(b => b.id == boardId);
+        if (board) {
+            loadTasks(board.tasks);
+            loadColumns(board.columns);
+        }
+    }
+}
+
+// Load Columns
+function loadColumns(columns) {
+    const columnsContainer = document.getElementById('columns');
+    columnsContainer.innerHTML = columns.map(column => `
+        <div class="column" data-column-name="${column.name}">
+            <h4>${column.name}</h4>
+        </div>
+    `).join('');
+}
+
+// Load Tasks
+function loadTasks(tasks) {
+    const tasksContainer = document.getElementById('tasks');
+    tasksContainer.innerHTML = tasks.map(task => `
+        <div class="task" data-task-id="${task.id}">
+            <div>${task.name}</div>
+            ${task.columns ? Object.entries(task.columns).map(([key, value]) => `
+                <div>${key}: ${value}</div>
+            `).join('') : ''}
+            <button onclick="editTask(${task.id})">Edit</button>
+            <button onclick="deleteTask(${task.id})">Delete</button>
+        </div>
+    `).join('');
+    initializeSortable();
+}
+
+// Initialize Drag-and-Drop
+function initializeSortable() {
+    const tasksContainer = document.getElementById('tasks');
+    Sortable.create(tasksContainer, {
+        group: 'tasks',
+        animation: 150,
+        onEnd: function (evt) {
+            saveProjects();
+        }
+    });
 }
 
 // Add New Project
@@ -41,6 +94,7 @@ function addProject() {
             boards: []
         };
         projects.push(newProject);
+        saveProjects();
         loadProjects();
     }
 }
@@ -52,6 +106,7 @@ function renameProject() {
         const newName = prompt("Enter new project name:", project.name);
         if (newName) {
             project.name = newName;
+            saveProjects();
             loadProjects();
         }
     }
@@ -61,6 +116,7 @@ function renameProject() {
 function deleteProject() {
     if (confirm("Are you sure you want to delete this project?")) {
         projects = projects.filter(p => p.id != currentProjectId);
+        saveProjects();
         loadProjects();
     }
 }
@@ -74,10 +130,15 @@ function addBoard() {
             const newBoard = {
                 id: Date.now(),
                 name: boardName,
-                columns: [],
+                columns: [
+                    { name: "Task", type: "text" },
+                    { name: "Progress", type: "dropdown", options: ["New", "In Progress", "Completed"] },
+                    { name: "Files", type: "file" }
+                ],
                 tasks: []
             };
             project.boards.push(newBoard);
+            saveProjects();
             loadBoards(project.boards);
         }
     }
@@ -92,6 +153,7 @@ function editBoard(boardId) {
             const newName = prompt("Enter new board name:", board.name);
             if (newName) {
                 board.name = newName;
+                saveProjects();
                 loadBoards(project.boards);
             }
         }
@@ -104,6 +166,7 @@ function deleteBoard(boardId) {
         const project = projects.find(p => p.id == currentProjectId);
         if (project) {
             project.boards = project.boards.filter(b => b.id != boardId);
+            saveProjects();
             loadBoards(project.boards);
         }
     }
@@ -116,29 +179,70 @@ function addTask() {
     if (taskText) {
         const project = projects.find(p => p.id == currentProjectId);
         if (project && project.boards.length > 0) {
-            const board = project.boards[0]; // Add to the first board for now
-            board.tasks.push({
-                id: Date.now(),
-                name: taskText,
-                columns: {}
-            });
-            taskInput.value = '';
-            loadTasks(board.tasks);
+            const board = project.boards.find(b => b.id == currentBoardId);
+            if (board) {
+                board.tasks.push({
+                    id: Date.now(),
+                    name: taskText,
+                    columns: {}
+                });
+                taskInput.value = '';
+                saveProjects();
+                loadTasks(board.tasks);
+            }
         }
     }
 }
 
-// Load Tasks
-function loadTasks(tasks) {
-    const tasksContainer = document.getElementById('tasks');
-    tasksContainer.innerHTML = tasks.map(task => `
-        <div class="task" data-task-id="${task.id}">
-            <div>${task.name}</div>
-            <button onclick="editTask(${task.id})">Edit</button>
-            <button onclick="deleteTask(${task.id})">Delete</button>
-        </div>
-    `).join('');
+// Edit Task
+function editTask(taskId) {
+    const project = projects.find(p => p.id == currentProjectId);
+    if (project) {
+        const board = project.boards.find(b => b.id == currentBoardId);
+        if (board) {
+            const task = board.tasks.find(t => t.id == taskId);
+            if (task) {
+                const newName = prompt("Enter new task name:", task.name);
+                if (newName) {
+                    task.name = newName;
+                    saveProjects();
+                    loadTasks(board.tasks);
+                }
+            }
+        }
+    }
+}
+
+// Delete Task
+function deleteTask(taskId) {
+    if (confirm("Are you sure you want to delete this task?")) {
+        const project = projects.find(p => p.id == currentProjectId);
+        if (project) {
+            const board = project.boards.find(b => b.id == currentBoardId);
+            if (board) {
+                board.tasks = board.tasks.filter(t => t.id != taskId);
+                saveProjects();
+                loadTasks(board.tasks);
+            }
+        }
+    }
+}
+
+// Save Projects to LocalStorage
+function saveProjects() {
+    localStorage.setItem('projects', JSON.stringify(projects));
+}
+
+// Load Projects from LocalStorage
+function loadProjectsFromStorage() {
+    const savedProjects = localStorage.getItem('projects');
+    if (savedProjects) {
+        projects = JSON.parse(savedProjects);
+    }
 }
 
 // Initialize
-document.addEventListener('DOMContentLoaded', loadProjects);
+document.addEventListener('DOMContentLoaded', () => {
+    loadProjectsFromStorage();
+    loadProjects();
+});
