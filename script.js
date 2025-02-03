@@ -1,9 +1,13 @@
 let currentProjectId = null;
-let projects = [];
+let projects = JSON.parse(localStorage.getItem('projects')) || [];
 
 document.addEventListener('DOMContentLoaded', () => {
     loadProjects();
 });
+
+function saveProjects() {
+    localStorage.setItem('projects', JSON.stringify(projects));
+}
 
 function loadProjects() {
     const projectList = document.getElementById('projectList');
@@ -20,6 +24,7 @@ function loadProjects() {
             <button class="add-board-btn" onclick="addBoard(${project.id})">+ Add Board</button>
         </li>
     `).join('');
+    saveProjects();
 }
 
 function selectProject(projectId) {
