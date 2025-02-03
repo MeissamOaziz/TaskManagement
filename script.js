@@ -58,44 +58,66 @@ function loadProjects() {
         projectItem.onclick = () => selectProject(project.id);
         projectItem.ondblclick = () => editProject(project.id);
 
-        const addBoardBtn = document.createElement('button');
-        addBoardBtn.textContent = '+ Add Board';
-        addBoardBtn.classList.add('add-board-btn');
-        addBoardBtn.addEventListener('click', (event) => {
-            event.stopPropagation();
-            addBoard(project.id);
-        });
-        projectItem.appendChild(addBoardBtn);
+        if (project.id === currentProjectId) {
+            projectItem.classList.add('active');
+        }
 
         const boardList = document.createElement('ul');
         boardList.classList.add('board-list');
         boardList.id = `boards-${project.id}`;
 
-        project.boards.forEach(board => {
-            console.log("Board found:", board.name);
-            const boardItem = document.createElement('li');
-            boardItem.classList.add('board-item');
-            boardItem.textContent = board.name;
-            boardItem.onclick = (event) => {
-                event.stopPropagation();
-                selectBoard(project.id, board.id);
-            };
-            boardItem.ondblclick = () => editBoard(project.id, board.id);
-            boardList.appendChild(boardItem);
-        });
-
+        if (project.id === currentProjectId) {
+            project.boards.forEach(board => {
+                console.log("Board found:", board.name);
+                const boardItem = document.createElement('li');
+                boardItem.classList.add('board-item');
+                boardItem.textContent = board.name;
+                boardItem.onclick = (event) => {
+                    event.stopPropagation();
+                    selectBoard(project.id, board.id);
+                };
+                boardItem.ondblclick = () => editBoard(project.id, board.id);
+                if (board.id === currentBoardId) {
+                    boardItem.classList.add('active');
+                }
+                boardList.appendChild(boardItem);
+            });
+        }
         projectItem.appendChild(boardList);
         projectList.appendChild(projectItem);
     });
+    loadBoards();
     saveProjects();
+}
+
+function loadBoards() {
+    const boardsContainer = document.getElementById('boards');
+    if (!boardsContainer) return;
+    boardsContainer.innerHTML = '';
+    const project = window.projects.find(p => p.id === currentProjectId);
+    if (!project) return;
+    
+    project.boards.forEach(board => {
+        if (board.id === currentBoardId) {
+            const boardElement = document.createElement('div');
+            boardElement.classList.add('board-view');
+            boardElement.innerHTML = `<h3>${board.name}</h3>`;
+            const taskList = document.createElement('ul');
+            board.tasks.forEach(task => {
+                const taskItem = document.createElement('li');
+                taskItem.textContent = task.name;
+                taskList.appendChild(taskItem);
+            });
+            boardElement.appendChild(taskList);
+            boardsContainer.appendChild(boardElement);
+        }
+    });
 }
 
 function selectProject(projectId) {
     console.log("Selected project ID:", projectId);
     currentProjectId = projectId;
     currentBoardId = null;
-    document.querySelectorAll('.project-item').forEach(item => item.classList.remove('active'));
-    document.querySelector(`.project-item:nth-child(${window.projects.findIndex(p => p.id === projectId) + 1})`).classList.add('active');
     loadProjects();
 }
 
@@ -103,48 +125,7 @@ function selectBoard(projectId, boardId) {
     console.log("Selected board ID:", boardId);
     currentProjectId = projectId;
     currentBoardId = boardId;
-}
-
-function addProject() {
-    console.log("Adding new project...");
-    const projectName = prompt("Enter project name:");
-    if (projectName) {
-        const newProject = { id: Date.now(), name: projectName, boards: [] };
-        window.projects.push(newProject);
-        loadProjects();
-    }
-}
-
-function editProject(projectId) {
-    const project = window.projects.find(p => p.id == projectId);
-    const newName = prompt("Enter new project name:", project.name);
-    if (newName) {
-        project.name = newName;
-        loadProjects();
-    }
-}
-
-function addBoard(projectId) {
-    console.log("Adding board to project ID:", projectId);
-    const boardName = prompt("Enter board name:");
-    if (boardName) {
-        const project = window.projects.find(p => p.id == projectId);
-        if (project) {
-            const newBoard = { id: Date.now(), name: boardName, tasks: [] };
-            project.boards.push(newBoard);
-            loadProjects();
-        }
-    }
-}
-
-function editBoard(projectId, boardId) {
-    const project = window.projects.find(p => p.id == projectId);
-    const board = project.boards.find(b => b.id == boardId);
-    const newName = prompt("Enter new board name:", board.name);
-    if (newName) {
-        board.name = newName;
-        loadProjects();
-    }
+    loadProjects();
 }
 
 function addTask() {
