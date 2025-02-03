@@ -2,6 +2,7 @@ let currentProjectId = null;
 let projects = JSON.parse(localStorage.getItem('projects')) || [];
 
 document.addEventListener('DOMContentLoaded', () => {
+    console.log("Script loaded successfully");
     document.getElementById('addProjectBtn').addEventListener('click', addProject);
     document.getElementById('addBoardBtn').addEventListener('click', () => {
         if (currentProjectId) {
@@ -25,9 +26,11 @@ function saveProjects() {
 }
 
 function loadProjects() {
+    console.log("Loading projects...");
     const projectList = document.getElementById('projectList');
     projectList.innerHTML = '';
     projects.forEach(project => {
+        console.log("Project found:", project.name);
         const projectItem = document.createElement('li');
         projectItem.classList.add('project-item');
         projectItem.textContent = project.name;
@@ -48,6 +51,7 @@ function loadProjects() {
         boardList.id = `boards-${project.id}`;
 
         project.boards.forEach(board => {
+            console.log("Board found:", board.name);
             const boardItem = document.createElement('li');
             boardItem.classList.add('board-item');
             boardItem.textContent = board.name;
@@ -66,6 +70,7 @@ function loadProjects() {
 }
 
 function selectProject(projectId) {
+    console.log("Selected project ID:", projectId);
     currentProjectId = projectId;
     document.querySelectorAll('.project-item').forEach(item => item.classList.remove('active'));
     document.querySelector(`.project-item:nth-child(${projects.findIndex(p => p.id === projectId) + 1})`).classList.add('active');
@@ -73,6 +78,7 @@ function selectProject(projectId) {
 }
 
 function addProject() {
+    console.log("Adding new project...");
     const projectName = prompt("Enter project name:");
     if (projectName) {
         const newProject = { id: Date.now(), name: projectName, boards: [] };
@@ -91,6 +97,7 @@ function editProject(projectId) {
 }
 
 function addBoard(projectId) {
+    console.log("Adding board to project ID:", projectId);
     const boardName = prompt("Enter board name:");
     if (boardName) {
         const project = projects.find(p => p.id == projectId);
@@ -112,6 +119,7 @@ function editBoard(projectId, boardId) {
 }
 
 function addTask() {
+    console.log("Adding task to project ID:", currentProjectId);
     if (!currentProjectId) {
         alert("Select a project first.");
         return;
