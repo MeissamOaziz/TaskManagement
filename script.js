@@ -1,15 +1,19 @@
 let currentProjectId = null;
+let projects = [];
+
+document.addEventListener('DOMContentLoaded', () => {
+    loadProjects();
+});
 
 function loadProjects() {
     const projectList = document.getElementById('projectList');
     projectList.innerHTML = projects.map(project => `
-        <li class="project-item" onclick="selectProject(${project.id})" onmouseover="hoverProject(this)" onmouseout="unhoverProject(this)">
+        <li class="project-item" onclick="selectProject(${project.id})">
             <span ondblclick="editProject(${project.id})">${project.name}</span>
             <ul class="board-list" id="boards-${project.id}">
                 ${project.boards.map(board => `
-                    <li class="board-item" onclick="selectBoard(event, ${project.id}, ${board.id})" onmouseover="hoverBoard(this)" onmouseout="unhoverBoard(this)">
+                    <li class="board-item" onclick="selectBoard(event, ${project.id}, ${board.id})">
                         <span ondblclick="editBoard(${project.id}, ${board.id})">${board.name}</span>
-                        <ul class="task-list" id="tasks-${board.id}"></ul>
                     </li>
                 `).join('')}
             </ul>
@@ -21,9 +25,17 @@ function loadProjects() {
 function selectProject(projectId) {
     currentProjectId = projectId;
     document.querySelectorAll('.project-item').forEach(item => item.classList.remove('active'));
-    document.querySelector(`li[onclick='selectProject(${projectId})']`).classList.add('active');
+    document.querySelector(`.project-item[onclick='selectProject(${projectId})']`).classList.add('active');
     loadBoards(projects.find(p => p.id == projectId).boards, projectId);
-    document.getElementById('selectedProjectName').textContent = projects.find(p => p.id == projectId).name;
+}
+
+function addProject() {
+    const projectName = prompt("Enter project name:");
+    if (projectName) {
+        const newProject = { id: Date.now(), name: projectName, boards: [] };
+        projects.push(newProject);
+        loadProjects();
+    }
 }
 
 function editProject(projectId) {
@@ -35,40 +47,38 @@ function editProject(projectId) {
     }
 }
 
+function addBoard(projectId) {
+    const boardName = prompt("Enter board name:");
+    if (boardName) {
+        const project = projects.find(p => p.id == projectId);
+        if (project) {
+            project.boards.push({ id: Date.now(), name: boardName, tasks: [] });
+            loadProjects();
+        }
+    }
+}
+
 function editBoard(projectId, boardId) {
     const project = projects.find(p => p.id == projectId);
     const board = project.boards.find(b => b.id == boardId);
     const newName = prompt("Enter new board name:", board.name);
     if (newName) {
         board.name = newName;
-        loadBoards(project.boards, projectId);
+        loadProjects();
     }
 }
 
-function hoverProject(element) {
-    element.style.background = "#1abc9c";
+function addTask() {
+    if (!currentProjectId) {
+        alert("Select a project first.");
+        return;
+    }
+    const taskName = prompt("Enter task name:");
+    if (taskName) {
+        const project = projects.find(p => p.id == currentProjectId);
+        if (project && project.boards.length > 0) {
+            project.boards[0].tasks.push({ id: Date.now(), name: taskName });
+            loadProjects();
+        }
+    }
 }
-
-function unhoverProject(element) {
-    element.style.background = "#34495e";
-}
-
-function hoverBoard(element) {
-    element.style.background = "#3b8bd5";
-}
-
-function unhoverBoard(element) {
-    element.style.background = "#3b5998";
-}
-
-function loadBoards(boards, projectId) {
-    const boardsContainer = document.getElementById(`boards-${projectId}`);
-    boardsContainer.innerHTML = boards.map(board => `
-        <li class="board-item" onclick="selectBoard(event, ${projectId}, ${board.id})" onmouseover="hoverBoard(this)" onmouseout="unhoverBoard(this)">
-            <span ondblclick="editBoard(${projectId}, ${board.id})">${board.name}</span>
-            <ul class="task-list" id="tasks-${board.id}"></ul>
-        </li>
-    `).join('');
-}
-
-document.addEventListener('DOMContentLoaded', loadProjects);
