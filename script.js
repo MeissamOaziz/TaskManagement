@@ -1,11 +1,10 @@
 let currentProjectId = null;
-let projects;
 
 try {
-    projects = JSON.parse(localStorage.getItem('projects')) || [];
+    var projects = JSON.parse(localStorage.getItem('projects')) || [];
 } catch (error) {
     console.error("Error loading projects from localStorage:", error);
-    projects = [];
+    var projects = [];
 }
 
 document.addEventListener('DOMContentLoaded', () => {
