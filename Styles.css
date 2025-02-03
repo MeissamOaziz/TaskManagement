@@ -66,10 +66,12 @@ body {
     background: #3498db;
     border: none;
     color: white;
-    padding: 8px;
-    margin-top: 5px;
+    padding: 10px;
+    margin-top: 10px;
     cursor: pointer;
     border-radius: 5px;
+    width: 100%;
+    text-align: center;
 }
 
 .add-btn:hover, .add-board-btn:hover {
@@ -81,4 +83,33 @@ body {
     padding: 20px;
     background: white;
     box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+}
+
+.task-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.task-table th, .task-table td {
+    padding: 10px;
+    border: 1px solid #ddd;
+    text-align: left;
+}
+
+.task-table th {
+    background: #f1f1f1;
+}
+
+.task-table td button {
+    background: #e74c3c;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    border-radius: 3px;
+}
+
+.task-table td button:hover {
+    background: #c0392b;
 }
