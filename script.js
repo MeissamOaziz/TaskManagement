@@ -14,17 +14,9 @@ if (!window.projects) {
 document.addEventListener('DOMContentLoaded', () => {
     console.log("Script loaded successfully");
     const addProjectBtn = document.getElementById('addProjectBtn');
-    const addBoardBtn = document.getElementById('addBoardBtn');
     const addTaskBtn = document.getElementById('addTaskBtn');
 
     if (addProjectBtn) addProjectBtn.addEventListener('click', addProject);
-    if (addBoardBtn) addBoardBtn.addEventListener('click', () => {
-        if (currentProjectId) {
-            addBoard(currentProjectId);
-        } else {
-            alert("Please select a project first.");
-        }
-    });
     if (addTaskBtn) addTaskBtn.addEventListener('click', () => {
         if (currentProjectId && currentBoardId) {
             addTask();
@@ -54,14 +46,19 @@ function loadProjects() {
         console.log("Project found:", project.name);
         const projectItem = document.createElement('li');
         projectItem.classList.add('project-item');
-        projectItem.textContent = project.name;
+        projectItem.innerHTML = `<span contenteditable="true" class="editable">${project.name}</span>`;
         projectItem.onclick = () => selectProject(project.id);
-        projectItem.ondblclick = () => editProject(project.id);
-
+        
         if (project.id === currentProjectId) {
             projectItem.classList.add('active');
         }
 
+        const addBoardBtn = document.createElement('button');
+        addBoardBtn.textContent = '+ Add Board';
+        addBoardBtn.classList.add('add-board-btn');
+        addBoardBtn.onclick = () => addBoard(project.id);
+        projectItem.appendChild(addBoardBtn);
+        
         const boardList = document.createElement('ul');
         boardList.classList.add('board-list');
         boardList.id = `boards-${project.id}`;
@@ -71,12 +68,11 @@ function loadProjects() {
                 console.log("Board found:", board.name);
                 const boardItem = document.createElement('li');
                 boardItem.classList.add('board-item');
-                boardItem.textContent = board.name;
+                boardItem.innerHTML = `<span contenteditable="true" class="editable">${board.name}</span>`;
                 boardItem.onclick = (event) => {
                     event.stopPropagation();
                     selectBoard(project.id, board.id);
                 };
-                boardItem.ondblclick = () => editBoard(project.id, board.id);
                 if (board.id === currentBoardId) {
                     boardItem.classList.add('active');
                 }
@@ -100,7 +96,7 @@ function loadBoards() {
     project.boards.forEach(board => {
         const boardElement = document.createElement('div');
         boardElement.classList.add('board-view');
-        boardElement.innerHTML = `<h3>${board.name}</h3>`;
+        boardElement.innerHTML = `<h3 contenteditable="true" class="editable">${board.name}</h3>`;
         
         if (board.id === currentBoardId) {
             boardElement.classList.add('active');
@@ -109,7 +105,7 @@ function loadBoards() {
         const taskList = document.createElement('ul');
         board.tasks.forEach(task => {
             const taskItem = document.createElement('li');
-            taskItem.textContent = task.name;
+            taskItem.innerHTML = `<span contenteditable="true" class="editable">${task.name}</span>`;
             taskList.appendChild(taskItem);
         });
         boardElement.appendChild(taskList);
@@ -154,22 +150,4 @@ function selectBoard(projectId, boardId) {
     currentProjectId = projectId;
     currentBoardId = boardId;
     loadProjects();
-}
-
-function addTask() {
-    console.log("Adding task to board ID:", currentBoardId);
-    if (!currentProjectId || !currentBoardId) {
-        alert("Select a project and board first.");
-        return;
-    }
-    const taskName = prompt("Enter task name:");
-    if (taskName) {
-        const project = window.projects.find(p => p.id == currentProjectId);
-        const board = project.boards.find(b => b.id == currentBoardId);
-        if (board) {
-            board.tasks.push({ id: Date.now(), name: taskName });
-            saveProjects();
-            loadBoards();
-        }
-    }
 }
