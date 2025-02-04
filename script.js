@@ -77,6 +77,17 @@ function loadProjects() {
             deleteProject(project.id);
         };
         projectItem.appendChild(deleteBtn);
+
+        // Add Board Button
+        const addBoardBtn = document.createElement('button');
+        addBoardBtn.textContent = '+ Add Board';
+        addBoardBtn.classList.add('add-btn');
+        addBoardBtn.onclick = (event) => {
+            event.stopPropagation();
+            addBoard(project.id);
+        };
+        projectItem.appendChild(addBoardBtn);
+
         projectList.appendChild(projectItem);
     });
 }
@@ -104,21 +115,6 @@ function addBoard(projectId) {
         if (project) {
             const newBoard = { id: Date.now(), name: boardName, taskGroups: [] };
             project.boards.push(newBoard);
-            saveProjects();
-            loadProjects();
-        }
-    }
-}
-
-function addTaskGroup(boardId) {
-    const taskGroupName = prompt("Enter task group name:");
-    if (taskGroupName) {
-        const project = window.projects.find(p => p.id === currentProjectId);
-        const board = project?.boards.find(b => b.id === boardId);
-        if (board) {
-            const newTaskGroup = { id: Date.now(), name: taskGroupName, tasks: [] };
-            board.taskGroups = board.taskGroups || [];
-            board.taskGroups.push(newTaskGroup);
             saveProjects();
             loadProjects();
         }
