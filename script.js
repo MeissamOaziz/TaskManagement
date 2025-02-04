@@ -46,7 +46,20 @@ function loadProjects() {
         console.log("Project found:", project.name);
         const projectItem = document.createElement('li');
         projectItem.classList.add('project-item');
-        projectItem.innerHTML = `<span contenteditable="true" class="editable">${project.name}</span>`;
+        const projectNameSpan = document.createElement('span');
+        projectNameSpan.textContent = project.name;
+        projectNameSpan.classList.add('editable');
+        projectNameSpan.contentEditable = true;
+        projectNameSpan.ondblclick = (event) => {
+            event.stopPropagation();
+            projectNameSpan.contentEditable = true;
+            projectNameSpan.focus();
+        };
+        projectNameSpan.onblur = () => {
+            project.name = projectNameSpan.textContent;
+            saveProjects();
+        };
+        projectItem.appendChild(projectNameSpan);
         projectItem.onclick = () => selectProject(project.id);
         
         if (project.id === currentProjectId) {
@@ -68,7 +81,20 @@ function loadProjects() {
                 console.log("Board found:", board.name);
                 const boardItem = document.createElement('li');
                 boardItem.classList.add('board-item');
-                boardItem.innerHTML = `<span contenteditable="true" class="editable">${board.name}</span>`;
+                const boardNameSpan = document.createElement('span');
+                boardNameSpan.textContent = board.name;
+                boardNameSpan.classList.add('editable');
+                boardNameSpan.contentEditable = true;
+                boardNameSpan.ondblclick = (event) => {
+                    event.stopPropagation();
+                    boardNameSpan.contentEditable = true;
+                    boardNameSpan.focus();
+                };
+                boardNameSpan.onblur = () => {
+                    board.name = boardNameSpan.textContent;
+                    saveProjects();
+                };
+                boardItem.appendChild(boardNameSpan);
                 boardItem.onclick = (event) => {
                     event.stopPropagation();
                     selectBoard(project.id, board.id);
@@ -96,7 +122,20 @@ function loadBoards() {
     project.boards.forEach(board => {
         const boardElement = document.createElement('div');
         boardElement.classList.add('board-view');
-        boardElement.innerHTML = `<h3 contenteditable="true" class="editable">${board.name}</h3>`;
+        const boardNameHeading = document.createElement('h3');
+        boardNameHeading.textContent = board.name;
+        boardNameHeading.classList.add('editable');
+        boardNameHeading.contentEditable = true;
+        boardNameHeading.ondblclick = (event) => {
+            event.stopPropagation();
+            boardNameHeading.contentEditable = true;
+            boardNameHeading.focus();
+        };
+        boardNameHeading.onblur = () => {
+            board.name = boardNameHeading.textContent;
+            saveProjects();
+        };
+        boardElement.appendChild(boardNameHeading);
         
         if (board.id === currentBoardId) {
             boardElement.classList.add('active');
