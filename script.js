@@ -112,6 +112,11 @@ function addProject() {
         saveProjects();
         loadProjects();
     }
+};
+        window.projects.push(newProject);
+        saveProjects();
+        loadProjects();
+    }
 }
 
 function addBoard(projectId) {
