@@ -1,36 +1,39 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Task Management Platform</title>
-    <link rel="stylesheet" href="Styles.css">
-    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
-</head>
-<body>
-    <div class="app-container">
-        <!-- Sidebar Navigation -->
-        <aside class="sidebar">
-            <h2>Projects</h2>
-            <button id="addProjectBtn" class="add-btn">+ Add Project</button>
-            <ul id="projectList"></ul>
-        </aside>
-        
-        <!-- Main Content -->
-        <main class="main-content">
-            <div class="board-header">
-                <h2 id="selectedProjectName">Select a Project</h2>
-                <button id="addTaskGroupBtn" class="add-btn">+ Create New Task Group</button>
-            </div>
+<!-- Task Creation/Edit Form (Modal) -->
+<div id="taskFormModal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h3>Add/Edit Task</h3>
+        <form id="taskForm">
+            <label for="taskName">Task Name:</label>
+            <input type="text" id="taskName" name="taskName" required>
             
-            <!-- Task Group Section -->
-            <div class="task-group-section" id="taskGroupSection">
-                <!-- Task Groups and Tasks will be dynamically added here -->
-            </div>
-        </main>
+            <label for="startDate">Start Date:</label>
+            <input type="date" id="startDate" name="startDate" required>
+            
+            <label for="dueDate">Due Date:</label>
+            <input type="date" id="dueDate" name="dueDate" required>
+            
+            <label for="progress">Progress:</label>
+            <select id="progress" name="progress" required>
+                <!-- Progress options will be dynamically added here -->
+            </select>
+            
+            <button type="submit">Save Task</button>
+        </form>
     </div>
-    
-    <script src="data.js"></script>
-    <script src="script.js"></script>
-</body>
-</html>
+</div>
+
+<!-- Progress Options Customization Form (Modal) -->
+<div id="progressOptionsModal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h3>Customize Progress Options</h3>
+        <form id="progressOptionsForm">
+            <div id="progressOptionsList">
+                <!-- Progress options will be dynamically added here -->
+            </div>
+            <button type="button" id="addProgressOptionBtn">+ Add Progress Option</button>
+            <button type="submit">Save Progress Options</button>
+        </form>
+    </div>
+</div>
