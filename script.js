@@ -14,25 +14,9 @@ if (!window.projects) {
 document.addEventListener('DOMContentLoaded', () => {
     console.log("Script loaded successfully");
     const addProjectBtn = document.getElementById('addProjectBtn');
-    const addBoardBtn = document.getElementById('addBoardBtn');
-    const addTaskBtn = document.getElementById('addTaskBtn');
     const addTaskGroupBtn = document.getElementById('addTaskGroupBtn');
 
     if (addProjectBtn) addProjectBtn.addEventListener('click', addProject);
-    if (addBoardBtn) addBoardBtn.addEventListener('click', () => {
-        if (currentProjectId) {
-            addBoard(currentProjectId);
-        } else {
-            alert("Please select a project first.");
-        }
-    });
-    if (addTaskBtn) addTaskBtn.addEventListener('click', () => {
-        if (currentProjectId && currentBoardId) {
-            addTask();
-        } else {
-            alert("Please select a board first.");
-        }
-    });
     if (addTaskGroupBtn) addTaskGroupBtn.addEventListener('click', addTaskGroup);
     
     loadProjects();
@@ -64,12 +48,6 @@ function loadProjects() {
             projectItem.classList.add('active');
         }
 
-        const addBoardBtn = document.createElement('button');
-        addBoardBtn.textContent = '+ Add Board';
-        addBoardBtn.classList.add('add-board-btn');
-        addBoardBtn.onclick = () => addBoard(project.id);
-        projectItem.appendChild(addBoardBtn);
-        
         const boardList = document.createElement('ul');
         boardList.classList.add('board-list');
         boardList.id = `boards-${project.id}`;
@@ -91,6 +69,15 @@ function loadProjects() {
                 boardList.appendChild(boardItem);
             });
         }
+        
+        if (project.id === currentProjectId) {
+            const addBoardBtn = document.createElement('button');
+            addBoardBtn.textContent = '+ Add Board';
+            addBoardBtn.classList.add('add-board-btn');
+            addBoardBtn.onclick = () => addBoard(project.id);
+            projectItem.appendChild(addBoardBtn);
+        }
+        
         projectItem.appendChild(boardList);
         projectList.appendChild(projectItem);
     });
@@ -121,7 +108,7 @@ function loadBoards() {
                 const taskList = document.createElement('ul');
                 taskGroup.tasks.forEach(task => {
                     const taskItem = document.createElement('li');
-                    taskItem.textContent = task.name;
+                    taskItem.innerHTML = `${task.name} | ${task.startDate || '-'} | ${task.endDate || '-'} | ${task.progress || 'New'} | <button onclick='attachFile(${task.id})'>Upload File</button>`;
                     taskList.appendChild(taskItem);
                 });
                 
@@ -139,17 +126,21 @@ function loadBoards() {
     });
 }
 
-function addTaskGroup() {
-    if (!currentProjectId || !currentBoardId) {
-        alert("Select a project and board first.");
-        return;
-    }
+function addTask(boardId, groupId) {
     const project = window.projects.find(p => p.id === currentProjectId);
-    const board = project.boards.find(b => b.id === currentBoardId);
-    if (board) {
-        const newGroup = { id: Date.now(), name: `Task Group ${board.taskGroups.length + 1}`, tasks: [] };
-        board.taskGroups.push(newGroup);
-        saveProjects();
-        loadBoards();
+    const board = project.boards.find(b => b.id === boardId);
+    const taskGroup = board.taskGroups.find(g => g.id === groupId);
+    if (taskGroup) {
+        const taskName = prompt("Enter task name:");
+        if (taskName) {
+            const newTask = { id: Date.now(), name: taskName, startDate: '', endDate: '', progress: 'New' };
+            taskGroup.tasks.push(newTask);
+            saveProjects();
+            loadBoards();
+        }
     }
+}
+
+function attachFile(taskId) {
+    alert(`Attach a file to task ${taskId}`);
 }
