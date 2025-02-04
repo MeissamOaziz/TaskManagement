@@ -153,7 +153,8 @@ function openTaskFormModal(taskGroupId) {
 }
 
 // Save a new task
-function saveTask() {
+function saveTask(event) {
+    event.preventDefault(); // Prevent form submission
     const taskForm = document.getElementById('taskForm');
     const taskName = document.getElementById('taskName').value.trim();
     const startDate = document.getElementById('startDate').value;
@@ -190,4 +191,60 @@ function saveTask() {
 // Close a modal
 function closeModal(modalId) {
     document.getElementById(modalId).style.display = 'none';
+}
+
+// Select a project
+function selectProject(projectId) {
+    currentProjectId = projectId;
+    const selectedProject = window.projects.find(p => p.id === projectId);
+    if (selectedProject) {
+        document.getElementById('selectedProjectName').textContent = selectedProject.name;
+        loadBoards(projectId);
+    }
+}
+
+// Load boards for a selected project
+function loadBoards(projectId) {
+    const project = window.projects.find(p => p.id === projectId);
+    if (project) {
+        const boardList = document.getElementById(`boards-${projectId}`);
+        if (boardList) {
+            boardList.innerHTML = '';
+            project.boards.forEach(board => {
+                const boardItem = document.createElement('li');
+                boardItem.textContent = board.name;
+                boardItem.onclick = () => selectBoard(board.id);
+                boardList.appendChild(boardItem);
+            });
+        }
+    }
+}
+
+// Select a board
+function selectBoard(boardId) {
+    currentBoardId = boardId;
+    loadTaskGroups(boardId);
+}
+
+// Load task groups for a selected board
+function loadTaskGroups(boardId) {
+    const taskGroupSection = document.getElementById('taskGroupSection');
+    if (taskGroupSection) {
+        taskGroupSection.innerHTML = '';
+        const board = window.projects
+            .find(p => p.id === currentProjectId)
+            ?.boards.find(b => b.id === boardId);
+        if (board) {
+            board.taskGroups.forEach(taskGroup => {
+                const taskGroupDiv = document.createElement('div');
+                taskGroupDiv.classList.add('task-group');
+                taskGroupDiv.innerHTML = `
+                    <h3>${taskGroup.name}</h3>
+                    <button class="add-task-btn" data-task-group-id="${taskGroup.id}">+ Add Task</button>
+                    <ul class="task-list"></ul>
+                `;
+                taskGroupSection.appendChild(taskGroupDiv);
+            });
+        }
+    }
 }
