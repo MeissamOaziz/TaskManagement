@@ -128,45 +128,55 @@ function loadBoards() {
     const boardsContainer = document.getElementById('boards');
     if (!boardsContainer) return;
     boardsContainer.innerHTML = '';
+
+    // Update the path display
+    const pathDisplay = document.getElementById('pathDisplay');
+    if (pathDisplay) {
+        const project = window.projects.find(p => p.id === currentProjectId);
+        const board = project?.boards.find(b => b.id === currentBoardId);
+        if (project && board) {
+            pathDisplay.textContent = `${project.name} > ${board.name}`;
+        } else {
+            pathDisplay.textContent = "Select a Project";
+        }
+    }
+
     const project = window.projects.find(p => p.id === currentProjectId);
     if (!project) return;
-    
-    project.boards.forEach(board => {
-        const boardElement = document.createElement('div');
-        boardElement.classList.add('board-view');
-        const boardNameHeading = document.createElement('h3');
-        boardNameHeading.textContent = board.name;
-        boardNameHeading.classList.add('editable');
-        boardNameHeading.ondblclick = (event) => {
-            event.stopPropagation();
-            boardNameHeading.contentEditable = true;
-            boardNameHeading.focus();
-        };
-        boardNameHeading.onblur = () => {
-            boardNameHeading.contentEditable = false;
-            board.name = boardNameHeading.textContent;
-            saveProjects();
-        };
-        boardNameHeading.onkeydown = (event) => {
-            if (event.key === 'Enter') {
-                event.preventDefault();
-                boardNameHeading.blur(); // Save and exit edit mode
-            }
-        };
-        boardElement.appendChild(boardNameHeading);
-        
-        if (board.id === currentBoardId) {
-            boardElement.classList.add('active');
-        }
-        
+
+    const board = project.boards.find(b => b.id === currentBoardId);
+    if (!board) return;
+
+    // Add "Create New Task Group" button
+    const createTaskGroupBtn = document.createElement('button');
+    createTaskGroupBtn.textContent = '+ Create New Task Group';
+    createTaskGroupBtn.classList.add('create-task-group-btn');
+    createTaskGroupBtn.onclick = () => addTaskGroup(board.id);
+    boardsContainer.appendChild(createTaskGroupBtn);
+
+    // Load task groups
+    board.taskGroups?.forEach(taskGroup => {
+        const taskGroupElement = document.createElement('div');
+        taskGroupElement.classList.add('task-group');
+        taskGroupElement.innerHTML = `<h4>${taskGroup.name}</h4>`;
+
+        // Add "Add Task" button under each task group
+        const addTaskBtn = document.createElement('button');
+        addTaskBtn.textContent = '+ Add Task';
+        addTaskBtn.classList.add('add-task-btn');
+        addTaskBtn.onclick = () => addTask(board.id, taskGroup.id);
+        taskGroupElement.appendChild(addTaskBtn);
+
+        // Load tasks under the task group
         const taskList = document.createElement('ul');
-        board.tasks.forEach(task => {
+        taskGroup.tasks?.forEach(task => {
             const taskItem = document.createElement('li');
-            taskItem.innerHTML = `<span contenteditable="true" class="editable">${task.name}</span>`;
+            taskItem.textContent = task.name;
             taskList.appendChild(taskItem);
         });
-        boardElement.appendChild(taskList);
-        boardsContainer.appendChild(boardElement);
+        taskGroupElement.appendChild(taskList);
+
+        boardsContainer.appendChild(taskGroupElement);
     });
 }
 
@@ -187,10 +197,43 @@ function addBoard(projectId) {
     if (boardName) {
         const project = window.projects.find(p => p.id == projectId);
         if (project) {
-            const newBoard = { id: Date.now(), name: boardName, tasks: [] };
+            const newBoard = { id: Date.now(), name: boardName, taskGroups: [] };
             project.boards.push(newBoard);
             saveProjects();
             loadProjects();
+        }
+    }
+}
+
+function addTaskGroup(boardId) {
+    console.log("Adding task group to board ID:", boardId);
+    const taskGroupName = prompt("Enter task group name:");
+    if (taskGroupName) {
+        const project = window.projects.find(p => p.id === currentProjectId);
+        const board = project?.boards.find(b => b.id === boardId);
+        if (board) {
+            const newTaskGroup = { id: Date.now(), name: taskGroupName, tasks: [] };
+            board.taskGroups = board.taskGroups || [];
+            board.taskGroups.push(newTaskGroup);
+            saveProjects();
+            loadBoards();
+        }
+    }
+}
+
+function addTask(boardId, taskGroupId) {
+    console.log("Adding task to board ID:", boardId, "and task group ID:", taskGroupId);
+    const taskName = prompt("Enter task name:");
+    if (taskName) {
+        const project = window.projects.find(p => p.id === currentProjectId);
+        const board = project?.boards.find(b => b.id === boardId);
+        const taskGroup = board?.taskGroups?.find(tg => tg.id === taskGroupId);
+        if (taskGroup) {
+            const newTask = { id: Date.now(), name: taskName };
+            taskGroup.tasks = taskGroup.tasks || [];
+            taskGroup.tasks.push(newTask);
+            saveProjects();
+            loadBoards();
         }
     }
 }
