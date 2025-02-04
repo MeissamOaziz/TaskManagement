@@ -132,6 +132,7 @@ function addProject() {
 
 // Add a new board to a project
 function addBoard(projectId) {
+    console.log("Adding a new board...");
     const boardName = prompt("Enter board name:");
     if (boardName) {
         const project = window.projects.find(p => p.id == projectId);
@@ -139,7 +140,64 @@ function addBoard(projectId) {
             const newBoard = { id: Date.now(), name: boardName, taskGroups: [] };
             project.boards.push(newBoard);
             saveProjects();
-            loadProjects();
+            loadBoards(projectId); // Refresh the boards UI
+        }
+    }
+}
+
+// Load boards for a selected project
+function loadBoards(projectId) {
+    console.log("Loading boards for project:", projectId);
+    const project = window.projects.find(p => p.id === projectId);
+    if (project) {
+        const boardList = document.getElementById(`boards-${projectId}`);
+        if (boardList) {
+            boardList.innerHTML = ''; // Clear the existing list
+            project.boards.forEach(board => {
+                const boardItem = document.createElement('li');
+                boardItem.textContent = board.name;
+                boardItem.onclick = () => selectBoard(board.id);
+                boardList.appendChild(boardItem);
+            });
+        }
+    }
+}
+
+// Select a project
+function selectProject(projectId) {
+    currentProjectId = projectId; // Set the current project ID
+    const selectedProject = window.projects.find(p => p.id === projectId);
+    if (selectedProject) {
+        document.getElementById('selectedProjectName').textContent = selectedProject.name;
+        loadBoards(projectId); // Load boards for the selected project
+    }
+}
+
+// Select a board
+function selectBoard(boardId) {
+    currentBoardId = boardId;
+    loadTaskGroups(boardId);
+}
+
+// Load task groups for a selected board
+function loadTaskGroups(boardId) {
+    const taskGroupSection = document.getElementById('taskGroupSection');
+    if (taskGroupSection) {
+        taskGroupSection.innerHTML = '';
+        const board = window.projects
+            .find(p => p.id === currentProjectId)
+            ?.boards.find(b => b.id === boardId);
+        if (board) {
+            board.taskGroups.forEach(taskGroup => {
+                const taskGroupDiv = document.createElement('div');
+                taskGroupDiv.classList.add('task-group');
+                taskGroupDiv.innerHTML = `
+                    <h3>${taskGroup.name}</h3>
+                    <button class="add-task-btn" data-task-group-id="${taskGroup.id}">+ Add Task</button>
+                    <ul class="task-list"></ul>
+                `;
+                taskGroupSection.appendChild(taskGroupDiv);
+            });
         }
     }
 }
@@ -191,60 +249,4 @@ function saveTask(event) {
 // Close a modal
 function closeModal(modalId) {
     document.getElementById(modalId).style.display = 'none';
-}
-
-// Select a project
-function selectProject(projectId) {
-    currentProjectId = projectId;
-    const selectedProject = window.projects.find(p => p.id === projectId);
-    if (selectedProject) {
-        document.getElementById('selectedProjectName').textContent = selectedProject.name;
-        loadBoards(projectId);
-    }
-}
-
-// Load boards for a selected project
-function loadBoards(projectId) {
-    const project = window.projects.find(p => p.id === projectId);
-    if (project) {
-        const boardList = document.getElementById(`boards-${projectId}`);
-        if (boardList) {
-            boardList.innerHTML = '';
-            project.boards.forEach(board => {
-                const boardItem = document.createElement('li');
-                boardItem.textContent = board.name;
-                boardItem.onclick = () => selectBoard(board.id);
-                boardList.appendChild(boardItem);
-            });
-        }
-    }
-}
-
-// Select a board
-function selectBoard(boardId) {
-    currentBoardId = boardId;
-    loadTaskGroups(boardId);
-}
-
-// Load task groups for a selected board
-function loadTaskGroups(boardId) {
-    const taskGroupSection = document.getElementById('taskGroupSection');
-    if (taskGroupSection) {
-        taskGroupSection.innerHTML = '';
-        const board = window.projects
-            .find(p => p.id === currentProjectId)
-            ?.boards.find(b => b.id === boardId);
-        if (board) {
-            board.taskGroups.forEach(taskGroup => {
-                const taskGroupDiv = document.createElement('div');
-                taskGroupDiv.classList.add('task-group');
-                taskGroupDiv.innerHTML = `
-                    <h3>${taskGroup.name}</h3>
-                    <button class="add-task-btn" data-task-group-id="${taskGroup.id}">+ Add Task</button>
-                    <ul class="task-list"></ul>
-                `;
-                taskGroupSection.appendChild(taskGroupDiv);
-            });
-        }
-    }
 }
