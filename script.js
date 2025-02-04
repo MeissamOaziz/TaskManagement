@@ -1,5 +1,6 @@
 let currentProjectId = null;
 let currentBoardId = null;
+let currentTaskGroupId = null;
 
 // Ensure 'projects' is only declared once
 if (!window.projects) {
@@ -14,19 +15,14 @@ if (!window.projects) {
 document.addEventListener('DOMContentLoaded', () => {
     console.log("Script loaded successfully");
     const addProjectBtn = document.getElementById('addProjectBtn');
-    const addBoardBtn = document.getElementById('addBoardBtn');
-    const addTaskGroupBtn = document.createElement('button');
-    addTaskGroupBtn.textContent = '+ Add Task Group';
-    addTaskGroupBtn.classList.add('add-task-group-btn');
-    addTaskGroupBtn.onclick = () => addTaskGroup(currentBoardId);
-    document.querySelector('.board-header').appendChild(addTaskGroupBtn);
+    const addTaskGroupBtn = document.getElementById('addTaskGroupBtn');
 
     if (addProjectBtn) addProjectBtn.addEventListener('click', addProject);
-    if (addBoardBtn) addBoardBtn.addEventListener('click', () => {
-        if (currentProjectId) {
-            addBoard(currentProjectId);
+    if (addTaskGroupBtn) addTaskGroupBtn.addEventListener('click', () => {
+        if (currentBoardId) {
+            addTaskGroup(currentBoardId);
         } else {
-            alert("Please select a project first.");
+            alert("Please select a board first.");
         }
     });
     
@@ -79,7 +75,7 @@ function loadProjects() {
 
         const addBoardBtn = document.createElement('button');
         addBoardBtn.textContent = '+ Add Board';
-        addBoardBtn.classList.add('add-board-btn');
+        addBoardBtn.classList.add('add-btn');
         addBoardBtn.onclick = () => addBoard(project.id);
         projectItem.appendChild(addBoardBtn);
         
@@ -119,20 +115,35 @@ function loadProjects() {
                 if (board.id === currentBoardId) {
                     boardItem.classList.add('active');
                 }
+
+                // Load task groups under the board
+                const taskGroupList = document.createElement('ul');
+                taskGroupList.classList.add('task-group-list');
+                board.taskGroups?.forEach(taskGroup => {
+                    const taskGroupItem = document.createElement('li');
+                    taskGroupItem.classList.add('task-group-item');
+                    taskGroupItem.textContent = taskGroup.name;
+                    taskGroupItem.onclick = (event) => {
+                        event.stopPropagation();
+                        selectTaskGroup(board.id, taskGroup.id);
+                    };
+                    taskGroupList.appendChild(taskGroupItem);
+                });
+                boardItem.appendChild(taskGroupList);
                 boardList.appendChild(boardItem);
             });
         }
         projectItem.appendChild(boardList);
         projectList.appendChild(projectItem);
     });
-    loadBoards();
+    loadTaskGroups();
     saveProjects();
 }
 
-function loadBoards() {
-    const kanbanBoard = document.getElementById('kanbanBoard');
-    if (!kanbanBoard) return;
-    kanbanBoard.innerHTML = '';
+function loadTaskGroups() {
+    const taskGroupSection = document.getElementById('taskGroupSection');
+    if (!taskGroupSection) return;
+    taskGroupSection.innerHTML = '';
 
     const project = window.projects.find(p => p.id === currentProjectId);
     if (!project) return;
@@ -140,32 +151,45 @@ function loadBoards() {
     const board = project.boards.find(b => b.id === currentBoardId);
     if (!board) return;
 
-    // Load task groups
     board.taskGroups?.forEach(taskGroup => {
         const taskGroupElement = document.createElement('div');
         taskGroupElement.classList.add('task-group');
         taskGroupElement.innerHTML = `<h3>${taskGroup.name}</h3>`;
 
-        const taskList = document.createElement('ul');
-        taskList.classList.add('task-list');
-        taskGroup.tasks?.forEach(task => {
-            const taskCard = document.createElement('li');
-            taskCard.classList.add('task-card');
-            taskCard.innerHTML = `
-                <h4>${task.name}</h4>
-                <p>${task.description || ''}</p>
-            `;
-            taskList.appendChild(taskCard);
-        });
-        taskGroupElement.appendChild(taskList);
-        kanbanBoard.appendChild(taskGroupElement);
-    });
+        // Add "Add Task" button under the task group
+        const addTaskBtn = document.createElement('button');
+        addTaskBtn.textContent = '+ Add Task';
+        addTaskBtn.classList.add('add-btn');
+        addTaskBtn.onclick = () => addTask(taskGroup.id);
+        taskGroupElement.appendChild(addTaskBtn);
 
-    // Enable drag-and-drop for task groups
-    Sortable.create(kanbanBoard, {
-        group: 'taskGroups',
-        animation: 150,
-        handle: '.task-group',
+        // Load tasks under the task group
+        const taskTable = document.createElement('table');
+        taskTable.classList.add('task-table');
+        taskTable.innerHTML = `
+            <thead>
+                <tr>
+                    <th>Task</th>
+                    <th>Start Date</th>
+                    <th>Due Date</th>
+                    <th>Progress</th>
+                    <th>Files</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${taskGroup.tasks?.map(task => `
+                    <tr>
+                        <td>${task.name}</td>
+                        <td>${task.startDate || ''}</td>
+                        <td>${task.dueDate || ''}</td>
+                        <td>${task.progress || ''}</td>
+                        <td>${task.files || ''}</td>
+                    </tr>
+                `).join('')}
+            </tbody>
+        `;
+        taskGroupElement.appendChild(taskTable);
+        taskGroupSection.appendChild(taskGroupElement);
     });
 }
 
@@ -205,7 +229,24 @@ function addTaskGroup(boardId) {
             board.taskGroups = board.taskGroups || [];
             board.taskGroups.push(newTaskGroup);
             saveProjects();
-            loadBoards();
+            loadProjects();
+        }
+    }
+}
+
+function addTask(taskGroupId) {
+    console.log("Adding task to task group ID:", taskGroupId);
+    const taskName = prompt("Enter task name:");
+    if (taskName) {
+        const project = window.projects.find(p => p.id === currentProjectId);
+        const board = project?.boards.find(b => b.id === currentBoardId);
+        const taskGroup = board?.taskGroups?.find(tg => tg.id === taskGroupId);
+        if (taskGroup) {
+            const newTask = { id: Date.now(), name: taskName, startDate: '', dueDate: '', progress: '', files: '' };
+            taskGroup.tasks = taskGroup.tasks || [];
+            taskGroup.tasks.push(newTask);
+            saveProjects();
+            loadTaskGroups();
         }
     }
 }
@@ -214,6 +255,7 @@ function selectProject(projectId) {
     console.log("Selected project ID:", projectId);
     currentProjectId = projectId;
     currentBoardId = null;
+    currentTaskGroupId = null;
     loadProjects();
 }
 
@@ -221,5 +263,13 @@ function selectBoard(projectId, boardId) {
     console.log("Selected board ID:", boardId);
     currentProjectId = projectId;
     currentBoardId = boardId;
+    currentTaskGroupId = null;
     loadProjects();
+}
+
+function selectTaskGroup(boardId, taskGroupId) {
+    console.log("Selected task group ID:", taskGroupId);
+    currentBoardId = boardId;
+    currentTaskGroupId = taskGroupId;
+    loadTaskGroups();
 }
