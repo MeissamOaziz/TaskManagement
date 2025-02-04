@@ -88,8 +88,14 @@ function loadProjects() {
         };
         projectItem.appendChild(addBoardBtn);
 
+        const boardList = document.createElement('ul');
+        boardList.classList.add('board-list');
+        boardList.id = `boards-${project.id}`;
+        projectItem.appendChild(boardList);
+
         projectList.appendChild(projectItem);
     });
+    saveProjects();
 }
 
 function deleteProject(projectId) {
@@ -114,6 +120,13 @@ function addBoard(projectId) {
         const project = window.projects.find(p => p.id == projectId);
         if (project) {
             const newBoard = { id: Date.now(), name: boardName, taskGroups: [] };
+            project.boards.push(newBoard);
+            saveProjects();
+            loadProjects();
+            loadBoards(projectId);
+        }
+    }
+};
             project.boards.push(newBoard);
             saveProjects();
             loadProjects();
