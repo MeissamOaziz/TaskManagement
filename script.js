@@ -46,28 +46,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    const taskForm = document.getElementById('taskForm');
-    if (taskForm) {
-        taskForm.addEventListener('submit', (event) => {
-            event.preventDefault();
-            saveTask();
-        });
-    }
-
-    if (addProgressOptionBtn) {
-        addProgressOptionBtn.addEventListener('click', () => {
-            addProgressOption();
-        });
-    }
-
-    const progressOptionsForm = document.getElementById('progressOptionsForm');
-    if (progressOptionsForm) {
-        progressOptionsForm.addEventListener('submit', (event) => {
-            event.preventDefault();
-            saveProgressOptions();
-        });
-    }
-
     loadProjects();
 });
 
@@ -86,17 +64,27 @@ function loadProjects() {
     
     projectList.innerHTML = '';
     window.projects.forEach(project => {
-        console.log("Project found:", project.name);
         const projectItem = document.createElement('li');
         projectItem.classList.add('project-item');
         projectItem.textContent = project.name;
         projectItem.onclick = () => selectProject(project.id);
-        if (project.id === currentProjectId) {
-            projectItem.classList.add('active');
-        }
+        
+        const deleteBtn = document.createElement('button');
+        deleteBtn.textContent = 'X';
+        deleteBtn.classList.add('delete-btn');
+        deleteBtn.onclick = (event) => {
+            event.stopPropagation();
+            deleteProject(project.id);
+        };
+        projectItem.appendChild(deleteBtn);
         projectList.appendChild(projectItem);
     });
+}
+
+function deleteProject(projectId) {
+    window.projects = window.projects.filter(p => p.id !== projectId);
     saveProjects();
+    loadProjects();
 }
 
 function addProject() {
