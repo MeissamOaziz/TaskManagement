@@ -47,8 +47,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // Close modals when clicking the close button
     document.querySelectorAll('.modal .close').forEach(button => {
         button.addEventListener('click', () => {
-            taskFormModal.style.display = 'none';
-            progressOptionsModal.style.display = 'none';
+            closeModal('taskFormModal');
+            closeModal('progressOptionsModal');
         });
     });
 
@@ -155,6 +155,7 @@ function loadBoards(projectId) {
             boardList.innerHTML = ''; // Clear the existing list
             project.boards.forEach(board => {
                 const boardItem = document.createElement('li');
+                boardItem.classList.add('board-item');
                 boardItem.textContent = board.name;
                 boardItem.onclick = () => selectBoard(board.id);
                 boardList.appendChild(boardItem);
@@ -197,8 +198,26 @@ function loadTaskGroups(boardId) {
                     <ul class="task-list"></ul>
                 `;
                 taskGroupSection.appendChild(taskGroupDiv);
+                loadTasks(taskGroup.id, taskGroupDiv.querySelector('.task-list'));
             });
         }
+    }
+}
+
+// Load tasks for a selected task group
+function loadTasks(taskGroupId, taskListElement) {
+    const taskGroup = window.projects
+        .find(p => p.id === currentProjectId)
+        ?.boards.find(b => b.id === currentBoardId)
+        ?.taskGroups.find(tg => tg.id === taskGroupId);
+    if (taskGroup && taskListElement) {
+        taskListElement.innerHTML = '';
+        taskGroup.tasks.forEach(task => {
+            const taskItem = document.createElement('li');
+            taskItem.classList.add('task-item');
+            taskItem.textContent = task.name;
+            taskListElement.appendChild(taskItem);
+        });
     }
 }
 
@@ -241,7 +260,7 @@ function saveTask(event) {
         taskGroup.tasks = taskGroup.tasks || [];
         taskGroup.tasks.push(newTask);
         saveProjects();
-        loadProjects();
+        loadTaskGroups(currentBoardId); // Refresh the task groups UI
         closeModal('taskFormModal');
     }
 }
