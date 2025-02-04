@@ -29,48 +29,49 @@
             </div>
         </main>
     </div>
-    
-    <script src="data.js"></script>
+
+    <!-- Task Creation/Edit Form (Modal) -->
+    <div id="taskFormModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h3>Add/Edit Task</h3>
+            <form id="taskForm">
+                <label for="taskName">Task Name:</label>
+                <input type="text" id="taskName" name="taskName" required>
+                
+                <label for="startDate">Start Date:</label>
+                <input type="date" id="startDate" name="startDate" required>
+                
+                <label for="dueDate">Due Date:</label>
+                <input type="date" id="dueDate" name="dueDate" required>
+                
+                <label for="progress">Progress:</label>
+                <select id="progress" name="progress" required>
+                    <option value="New">New</option>
+                    <option value="In Progress">In Progress</option>
+                    <option value="Completed">Completed</option>
+                </select>
+                
+                <button type="submit">Save Task</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Progress Options Customization Form (Modal) -->
+    <div id="progressOptionsModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h3>Customize Progress Options</h3>
+            <form id="progressOptionsForm">
+                <div id="progressOptionsList">
+                    <!-- Progress options will be dynamically added here -->
+                </div>
+                <button type="button" id="addProgressOptionBtn">+ Add Progress Option</button>
+                <button type="submit">Save Progress Options</button>
+            </form>
+        </div>
+    </div>
+
     <script src="script.js"></script>
 </body>
 </html>
-
-<!-- Task Creation/Edit Form (Modal) -->
-<div id="taskFormModal" class="modal">
-    <div class="modal-content">
-        <span class="close">&times;</span>
-        <h3>Add/Edit Task</h3>
-        <form id="taskForm">
-            <label for="taskName">Task Name:</label>
-            <input type="text" id="taskName" name="taskName" required>
-            
-            <label for="startDate">Start Date:</label>
-            <input type="date" id="startDate" name="startDate" required>
-            
-            <label for="dueDate">Due Date:</label>
-            <input type="date" id="dueDate" name="dueDate" required>
-            
-            <label for="progress">Progress:</label>
-            <select id="progress" name="progress" required>
-                <!-- Progress options will be dynamically added here -->
-            </select>
-            
-            <button type="submit">Save Task</button>
-        </form>
-    </div>
-</div>
-
-<!-- Progress Options Customization Form (Modal) -->
-<div id="progressOptionsModal" class="modal">
-    <div class="modal-content">
-        <span class="close">&times;</span>
-        <h3>Customize Progress Options</h3>
-        <form id="progressOptionsForm">
-            <div id="progressOptionsList">
-                <!-- Progress options will be dynamically added here -->
-            </div>
-            <button type="button" id="addProgressOptionBtn">+ Add Progress Option</button>
-            <button type="submit">Save Progress Options</button>
-        </form>
-    </div>
-</div>
