@@ -1,3 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Management Platform</title>
+    <link rel="stylesheet" href="Styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <h2>Projects</h2>
+            <button id="addProjectBtn" class="add-btn">+ Add Project</button>
+            <ul id="projectList"></ul>
+        </aside>
+        
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="board-header">
+                <h2 id="selectedProjectName">Select a Project</h2>
+                <button id="addTaskGroupBtn" class="add-btn">+ Create New Task Group</button>
+            </div>
+            
+            <!-- Task Group Section -->
+            <div class="task-group-section" id="taskGroupSection">
+                <!-- Task Groups and Tasks will be dynamically added here -->
+            </div>
+        </main>
+    </div>
+    
+    <script src="data.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
+
 <!-- Task Creation/Edit Form (Modal) -->
 <div id="taskFormModal" class="modal">
     <div class="modal-content">
