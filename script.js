@@ -78,7 +78,6 @@ function loadProjects() {
         projectItem.textContent = project.name;
         projectItem.onclick = () => selectProject(project.id);
 
-        // Add delete button
         const deleteBtn = document.createElement('button');
         deleteBtn.textContent = 'X';
         deleteBtn.classList.add('delete-btn');
@@ -88,7 +87,6 @@ function loadProjects() {
         };
         projectItem.appendChild(deleteBtn);
 
-        // Add board button
         const addBoardBtn = document.createElement('button');
         addBoardBtn.textContent = '+ Add Board';
         addBoardBtn.classList.add('add-btn');
@@ -98,13 +96,12 @@ function loadProjects() {
         };
         projectItem.appendChild(addBoardBtn);
 
-        // Add board list
         const boardList = document.createElement('ul');
         boardList.classList.add('board-list');
         boardList.id = `boards-${project.id}`;
         projectItem.appendChild(boardList);
-
         projectList.appendChild(projectItem);
+        loadBoards(project.id);
     });
     saveProjects();
 }
@@ -158,7 +155,13 @@ function loadBoards(projectId) {
                 boardItem.classList.add('board-item');
                 boardItem.textContent = board.name;
                 boardItem.onclick = () => selectBoard(board.id);
+
+                const taskGroupList = document.createElement('ul');
+                taskGroupList.classList.add('task-group-list');
+                taskGroupList.id = `task-groups-${board.id}`;
+                boardItem.appendChild(taskGroupList);
                 boardList.appendChild(boardItem);
+                loadTaskGroups(board.id);
             });
         }
     }
@@ -182,28 +185,23 @@ function selectBoard(boardId) {
 
 // Load task groups for a selected board
 function loadTaskGroups(boardId) {
-    const taskGroupSection = document.getElementById('taskGroupSection');
-    if (taskGroupSection) {
-        taskGroupSection.innerHTML = '';
+    const taskGroupList = document.getElementById(`task-groups-${boardId}`);
+    if (taskGroupList) {
+        taskGroupList.innerHTML = ''; // Clear the existing list
         const board = window.projects
             .find(p => p.id === currentProjectId)
             ?.boards.find(b => b.id === boardId);
         if (board) {
             board.taskGroups.forEach(taskGroup => {
-                const taskGroupDiv = document.createElement('div');
-                taskGroupDiv.classList.add('task-group');
-                taskGroupDiv.innerHTML = `
-                    <h3>${taskGroup.name}</h3>
-                    <button class="add-task-btn" data-task-group-id="${taskGroup.id}">+ Add Task</button>
-                    <ul class="task-list"></ul>
-                `;
-                taskGroupSection.appendChild(taskGroupDiv);
-                loadTasks(taskGroup.id, taskGroupDiv.querySelector('.task-list'));
+                const taskGroupItem = document.createElement('li');
+                taskGroupItem.classList.add('task-group-item');
+                taskGroupItem.textContent = taskGroup.name;
+                taskGroupItem.onclick = () => selectTaskGroup(taskGroup.id);
+                taskGroupList.appendChild(taskGroupItem);
             });
         }
     }
 }
-
 // Load tasks for a selected task group
 function loadTasks(taskGroupId, taskListElement) {
     const taskGroup = window.projects
@@ -227,6 +225,8 @@ function openTaskFormModal(taskGroupId) {
     const taskForm = document.getElementById('taskForm');
     taskForm.dataset.taskGroupId = taskGroupId;
     taskFormModal.style.display = 'flex';
+
+    document.getElementById('taskForm').addEventListener('submit', saveTask);
 }
 
 // Save a new task
@@ -263,6 +263,30 @@ function saveTask(event) {
         loadTaskGroups(currentBoardId); // Refresh the task groups UI
         closeModal('taskFormModal');
     }
+}
+
+function enableDragAndDrop() {
+    document.querySelectorAll('.task-list').forEach(taskList => {
+        Sortable.create(taskList, {
+            group: 'tasks',
+            animation: 150,
+            onEnd: (event) => {
+                const taskGroupId = event.to.closest('.task-group').dataset.taskGroupId;
+                const project = window.projects.find(p => p.id === currentProjectId);
+                const board = project?.boards.find(b => b.id === currentBoardId);
+                const taskGroup = board?.taskGroups.find(tg => tg.id == taskGroupId);
+                if (taskGroup) {
+                    const taskId = event.item.dataset.taskId;
+                    const task = taskGroup.tasks.find(t => t.id == taskId);
+                    if (task) {
+                        taskGroup.tasks.splice(event.oldIndex, 1);
+                        taskGroup.tasks.splice(event.newIndex, 0, task);
+                        saveProjects();
+                    }
+                }
+            }
+        });
+    });
 }
 
 // Close a modal
