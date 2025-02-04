@@ -49,15 +49,21 @@ function loadProjects() {
         const projectNameSpan = document.createElement('span');
         projectNameSpan.textContent = project.name;
         projectNameSpan.classList.add('editable');
-        projectNameSpan.contentEditable = true;
         projectNameSpan.ondblclick = (event) => {
             event.stopPropagation();
             projectNameSpan.contentEditable = true;
             projectNameSpan.focus();
         };
         projectNameSpan.onblur = () => {
+            projectNameSpan.contentEditable = false;
             project.name = projectNameSpan.textContent;
             saveProjects();
+        };
+        projectNameSpan.onkeydown = (event) => {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                projectNameSpan.blur(); // Save and exit edit mode
+            }
         };
         projectItem.appendChild(projectNameSpan);
         projectItem.onclick = () => selectProject(project.id);
@@ -84,15 +90,21 @@ function loadProjects() {
                 const boardNameSpan = document.createElement('span');
                 boardNameSpan.textContent = board.name;
                 boardNameSpan.classList.add('editable');
-                boardNameSpan.contentEditable = true;
                 boardNameSpan.ondblclick = (event) => {
                     event.stopPropagation();
                     boardNameSpan.contentEditable = true;
                     boardNameSpan.focus();
                 };
                 boardNameSpan.onblur = () => {
+                    boardNameSpan.contentEditable = false;
                     board.name = boardNameSpan.textContent;
                     saveProjects();
+                };
+                boardNameSpan.onkeydown = (event) => {
+                    if (event.key === 'Enter') {
+                        event.preventDefault();
+                        boardNameSpan.blur(); // Save and exit edit mode
+                    }
                 };
                 boardItem.appendChild(boardNameSpan);
                 boardItem.onclick = (event) => {
@@ -125,15 +137,21 @@ function loadBoards() {
         const boardNameHeading = document.createElement('h3');
         boardNameHeading.textContent = board.name;
         boardNameHeading.classList.add('editable');
-        boardNameHeading.contentEditable = true;
         boardNameHeading.ondblclick = (event) => {
             event.stopPropagation();
             boardNameHeading.contentEditable = true;
             boardNameHeading.focus();
         };
         boardNameHeading.onblur = () => {
+            boardNameHeading.contentEditable = false;
             board.name = boardNameHeading.textContent;
             saveProjects();
+        };
+        boardNameHeading.onkeydown = (event) => {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                boardNameHeading.blur(); // Save and exit edit mode
+            }
         };
         boardElement.appendChild(boardNameHeading);
         
