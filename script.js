@@ -14,9 +14,17 @@ if (!window.projects) {
 document.addEventListener('DOMContentLoaded', () => {
     console.log("Script loaded successfully");
     const addProjectBtn = document.getElementById('addProjectBtn');
+    const addBoardBtn = document.getElementById('addBoardBtn');
     const addTaskBtn = document.getElementById('addTaskBtn');
 
     if (addProjectBtn) addProjectBtn.addEventListener('click', addProject);
+    if (addBoardBtn) addBoardBtn.addEventListener('click', () => {
+        if (currentProjectId) {
+            addBoard(currentProjectId);
+        } else {
+            alert("Please select a project first.");
+        }
+    });
     if (addTaskBtn) addTaskBtn.addEventListener('click', () => {
         if (currentProjectId && currentBoardId) {
             addTask();
@@ -129,15 +137,17 @@ function loadBoards() {
     if (!boardsContainer) return;
     boardsContainer.innerHTML = '';
 
-    // Update the path display
-    const pathDisplay = document.getElementById('pathDisplay');
-    if (pathDisplay) {
+    // Update the selected project name
+    const selectedProjectName = document.getElementById('selectedProjectName');
+    if (selectedProjectName) {
         const project = window.projects.find(p => p.id === currentProjectId);
         const board = project?.boards.find(b => b.id === currentBoardId);
         if (project && board) {
-            pathDisplay.textContent = `${project.name} > ${board.name}`;
+            selectedProjectName.textContent = `${project.name} > ${board.name}`;
+        } else if (project) {
+            selectedProjectName.textContent = project.name;
         } else {
-            pathDisplay.textContent = "Select a Project";
+            selectedProjectName.textContent = "Select a Project";
         }
     }
 
@@ -150,7 +160,7 @@ function loadBoards() {
     // Add "Create New Task Group" button
     const createTaskGroupBtn = document.createElement('button');
     createTaskGroupBtn.textContent = '+ Create New Task Group';
-    createTaskGroupBtn.classList.add('create-task-group-btn');
+    createTaskGroupBtn.classList.add('add-btn');
     createTaskGroupBtn.onclick = () => addTaskGroup(board.id);
     boardsContainer.appendChild(createTaskGroupBtn);
 
@@ -158,12 +168,12 @@ function loadBoards() {
     board.taskGroups?.forEach(taskGroup => {
         const taskGroupElement = document.createElement('div');
         taskGroupElement.classList.add('task-group');
-        taskGroupElement.innerHTML = `<h4>${taskGroup.name}</h4>`;
+        taskGroupElement.innerHTML = `<h3>${taskGroup.name}</h3>`;
 
         // Add "Add Task" button under each task group
         const addTaskBtn = document.createElement('button');
         addTaskBtn.textContent = '+ Add Task';
-        addTaskBtn.classList.add('add-task-btn');
+        addTaskBtn.classList.add('add-btn');
         addTaskBtn.onclick = () => addTask(board.id, taskGroup.id);
         taskGroupElement.appendChild(addTaskBtn);
 
