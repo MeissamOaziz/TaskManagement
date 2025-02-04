@@ -7,6 +7,7 @@ let progressOptions = [
     { name: "Completed", color: "#2ecc71" }
 ];
 
+// Initialize projects from localStorage
 if (!window.projects) {
     try {
         window.projects = JSON.parse(localStorage.getItem('projects')) || [];
@@ -16,14 +17,17 @@ if (!window.projects) {
     }
 }
 
+// Event listener for when the DOM is fully loaded
 document.addEventListener('DOMContentLoaded', () => {
     console.log("Script loaded successfully");
+
+    // Get buttons and modals
     const addProjectBtn = document.getElementById('addProjectBtn');
     const addTaskGroupBtn = document.getElementById('addTaskGroupBtn');
     const taskFormModal = document.getElementById('taskFormModal');
     const progressOptionsModal = document.getElementById('progressOptionsModal');
-    const addProgressOptionBtn = document.getElementById('addProgressOptionBtn');
 
+    // Attach event listeners
     if (addProjectBtn) addProjectBtn.addEventListener('click', addProject);
     if (addTaskGroupBtn) addTaskGroupBtn.addEventListener('click', () => {
         if (currentBoardId) {
@@ -33,12 +37,14 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // Event delegation for dynamically added elements
     document.addEventListener('click', (event) => {
         if (event.target.classList.contains('add-task-btn')) {
             openTaskFormModal(event.target.dataset.taskGroupId);
         }
     });
 
+    // Close modals when clicking the close button
     document.querySelectorAll('.modal .close').forEach(button => {
         button.addEventListener('click', () => {
             taskFormModal.style.display = 'none';
@@ -46,9 +52,11 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    // Load projects into the UI
     loadProjects();
 });
 
+// Save projects to localStorage
 function saveProjects() {
     try {
         localStorage.setItem('projects', JSON.stringify(window.projects));
@@ -57,18 +65,20 @@ function saveProjects() {
     }
 }
 
+// Load projects into the UI
 function loadProjects() {
     console.log("Loading projects...");
     const projectList = document.getElementById('projectList');
     if (!projectList) return;
-    
+
     projectList.innerHTML = '';
     window.projects.forEach(project => {
         const projectItem = document.createElement('li');
         projectItem.classList.add('project-item');
         projectItem.textContent = project.name;
         projectItem.onclick = () => selectProject(project.id);
-        
+
+        // Add delete button
         const deleteBtn = document.createElement('button');
         deleteBtn.textContent = 'X';
         deleteBtn.classList.add('delete-btn');
@@ -78,7 +88,7 @@ function loadProjects() {
         };
         projectItem.appendChild(deleteBtn);
 
-        // Add Board Button
+        // Add board button
         const addBoardBtn = document.createElement('button');
         addBoardBtn.textContent = '+ Add Board';
         addBoardBtn.classList.add('add-btn');
@@ -88,6 +98,7 @@ function loadProjects() {
         };
         projectItem.appendChild(addBoardBtn);
 
+        // Add board list
         const boardList = document.createElement('ul');
         boardList.classList.add('board-list');
         boardList.id = `boards-${project.id}`;
@@ -98,12 +109,14 @@ function loadProjects() {
     saveProjects();
 }
 
+// Delete a project
 function deleteProject(projectId) {
     window.projects = window.projects.filter(p => p.id !== projectId);
     saveProjects();
     loadProjects();
 }
 
+// Add a new project
 function addProject() {
     console.log("Adding a new project...");
     const projectName = prompt("Enter project name:");
@@ -115,18 +128,9 @@ function addProject() {
     } else {
         console.log("Project creation cancelled or invalid name.");
     }
-};
-        window.projects.push(newProject);
-        saveProjects();
-        loadProjects();
-    }
-};
-        window.projects.push(newProject);
-        saveProjects();
-        loadProjects();
-    }
 }
 
+// Add a new board to a project
 function addBoard(projectId) {
     const boardName = prompt("Enter board name:");
     if (boardName) {
@@ -136,17 +140,11 @@ function addBoard(projectId) {
             project.boards.push(newBoard);
             saveProjects();
             loadProjects();
-            loadBoards(projectId);
-        }
-    }
-};
-            project.boards.push(newBoard);
-            saveProjects();
-            loadProjects();
         }
     }
 }
 
+// Open the task form modal
 function openTaskFormModal(taskGroupId) {
     const taskFormModal = document.getElementById('taskFormModal');
     const taskForm = document.getElementById('taskForm');
@@ -154,6 +152,7 @@ function openTaskFormModal(taskGroupId) {
     taskFormModal.style.display = 'flex';
 }
 
+// Save a new task
 function saveTask() {
     const taskForm = document.getElementById('taskForm');
     const taskName = document.getElementById('taskName').value.trim();
@@ -188,6 +187,7 @@ function saveTask() {
     }
 }
 
+// Close a modal
 function closeModal(modalId) {
     document.getElementById(modalId).style.display = 'none';
 }
