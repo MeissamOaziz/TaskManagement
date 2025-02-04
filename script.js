@@ -99,24 +99,47 @@ function loadProjects() {
     saveProjects();
 }
 
+function addProject() {
+    const projectName = prompt("Enter project name:");
+    if (projectName) {
+        const newProject = { id: Date.now(), name: projectName, boards: [] };
+        window.projects.push(newProject);
+        saveProjects();
+        loadProjects();
+    }
+}
+
+function addBoard(projectId) {
+    const boardName = prompt("Enter board name:");
+    if (boardName) {
+        const project = window.projects.find(p => p.id == projectId);
+        if (project) {
+            const newBoard = { id: Date.now(), name: boardName, taskGroups: [] };
+            project.boards.push(newBoard);
+            saveProjects();
+            loadProjects();
+        }
+    }
+}
+
+function addTaskGroup(boardId) {
+    const taskGroupName = prompt("Enter task group name:");
+    if (taskGroupName) {
+        const project = window.projects.find(p => p.id === currentProjectId);
+        const board = project?.boards.find(b => b.id === boardId);
+        if (board) {
+            const newTaskGroup = { id: Date.now(), name: taskGroupName, tasks: [] };
+            board.taskGroups = board.taskGroups || [];
+            board.taskGroups.push(newTaskGroup);
+            saveProjects();
+            loadProjects();
+        }
+    }
+}
+
 function openTaskFormModal(taskGroupId) {
     const taskFormModal = document.getElementById('taskFormModal');
     const taskForm = document.getElementById('taskForm');
-    const progressSelect = document.getElementById('progress');
-
-    progressSelect.innerHTML = '';
-    progressOptions.forEach(option => {
-        const optionElement = document.createElement('option');
-        optionElement.value = option.name;
-        optionElement.textContent = option.name;
-        optionElement.style.backgroundColor = option.color;
-        progressSelect.appendChild(optionElement);
-    });
-
-    const today = new Date().toISOString().split('T')[0];
-    document.getElementById('startDate').value = today;
-    document.getElementById('dueDate').value = today;
-
     taskForm.dataset.taskGroupId = taskGroupId;
     taskFormModal.style.display = 'flex';
 }
