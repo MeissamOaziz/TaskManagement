@@ -59,7 +59,26 @@ body {
     background: #3b8bd5;
 }
 
-.add-btn, .add-board-btn {
+.task-group-list {
+    list-style: none;
+    padding-left: 15px;
+    margin-top: 5px;
+}
+
+.task-group-item {
+    background: #4a6fa5;
+    padding: 8px;
+    margin-top: 5px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.task-group-item:hover {
+    background: #5a8bbf;
+}
+
+.add-btn {
     background: #3498db;
     border: none;
     color: white;
@@ -71,7 +90,7 @@ body {
     text-align: center;
 }
 
-.add-btn:hover, .add-board-btn:hover {
+.add-btn:hover {
     background: #2980b9;
 }
 
@@ -91,20 +110,17 @@ body {
     margin-bottom: 20px;
 }
 
-/* Kanban Board Styles */
-.kanban-board {
+/* Task Group Section Styles */
+.task-group-section {
     display: flex;
+    flex-direction: column;
     gap: 20px;
-    overflow-x: auto;
-    padding-bottom: 20px;
 }
 
 .task-group {
     background: #f1f3f4;
     border-radius: 8px;
     padding: 15px;
-    width: 300px;
-    min-width: 300px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
@@ -114,52 +130,31 @@ body {
     color: #333;
 }
 
-.task-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    min-height: 100px;
+.task-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
 }
 
-.task-card {
-    background: white;
+.task-table th, .task-table td {
     padding: 10px;
-    margin-bottom: 10px;
-    border-radius: 4px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    cursor: pointer;
-    transition: transform 0.2s, box-shadow 0.2s;
+    border: 1px solid #ddd;
+    text-align: left;
 }
 
-.task-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+.task-table th {
+    background: #f1f1f1;
 }
 
-.task-card h4 {
-    margin: 0;
-    font-size: 14px;
-    color: #333;
-}
-
-.task-card p {
-    margin: 5px 0 0 0;
-    font-size: 12px;
-    color: #666;
-}
-
-/* Add Task Group Button */
-.add-task-group-btn {
-    background: #3498db;
-    border: none;
+.task-table td button {
+    background: #e74c3c;
     color: white;
-    padding: 10px;
+    border: none;
+    padding: 5px 10px;
     cursor: pointer;
-    border-radius: 5px;
-    text-align: center;
-    margin-bottom: 20px;
+    border-radius: 3px;
 }
 
-.add-task-group-btn:hover {
-    background: #2980b9;
+.task-table td button:hover {
+    background: #c0392b;
 }
