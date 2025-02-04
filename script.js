@@ -71,6 +71,56 @@ document.addEventListener('DOMContentLoaded', () => {
     loadProjects();
 });
 
+function saveProjects() {
+    try {
+        localStorage.setItem('projects', JSON.stringify(window.projects));
+    } catch (error) {
+        console.error("Error saving projects to localStorage:", error);
+    }
+}
+
+function loadProjects() {
+    console.log("Loading projects...");
+    const projectList = document.getElementById('projectList');
+    if (!projectList) return;
+    
+    projectList.innerHTML = '';
+    window.projects.forEach(project => {
+        console.log("Project found:", project.name);
+        const projectItem = document.createElement('li');
+        projectItem.classList.add('project-item');
+        projectItem.textContent = project.name;
+        projectItem.onclick = () => selectProject(project.id);
+        if (project.id === currentProjectId) {
+            projectItem.classList.add('active');
+        }
+        projectList.appendChild(projectItem);
+    });
+    saveProjects();
+}
+
+function openTaskFormModal(taskGroupId) {
+    const taskFormModal = document.getElementById('taskFormModal');
+    const taskForm = document.getElementById('taskForm');
+    const progressSelect = document.getElementById('progress');
+
+    progressSelect.innerHTML = '';
+    progressOptions.forEach(option => {
+        const optionElement = document.createElement('option');
+        optionElement.value = option.name;
+        optionElement.textContent = option.name;
+        optionElement.style.backgroundColor = option.color;
+        progressSelect.appendChild(optionElement);
+    });
+
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('startDate').value = today;
+    document.getElementById('dueDate').value = today;
+
+    taskForm.dataset.taskGroupId = taskGroupId;
+    taskFormModal.style.display = 'flex';
+}
+
 function saveTask() {
     const taskForm = document.getElementById('taskForm');
     const taskName = document.getElementById('taskName').value.trim();
@@ -100,31 +150,9 @@ function saveTask() {
         taskGroup.tasks = taskGroup.tasks || [];
         taskGroup.tasks.push(newTask);
         saveProjects();
-        loadTaskGroups();
+        loadProjects();
         closeModal('taskFormModal');
     }
-}
-
-function openTaskFormModal(taskGroupId) {
-    const taskFormModal = document.getElementById('taskFormModal');
-    const taskForm = document.getElementById('taskForm');
-    const progressSelect = document.getElementById('progress');
-
-    progressSelect.innerHTML = '';
-    progressOptions.forEach(option => {
-        const optionElement = document.createElement('option');
-        optionElement.value = option.name;
-        optionElement.textContent = option.name;
-        optionElement.style.backgroundColor = option.color;
-        progressSelect.appendChild(optionElement);
-    });
-
-    const today = new Date().toISOString().split('T')[0];
-    document.getElementById('startDate').value = today;
-    document.getElementById('dueDate').value = today;
-
-    taskForm.dataset.taskGroupId = taskGroupId;
-    taskFormModal.style.display = 'flex';
 }
 
 function closeModal(modalId) {
