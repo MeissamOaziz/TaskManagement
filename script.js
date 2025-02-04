@@ -105,9 +105,17 @@ function deleteProject(projectId) {
 }
 
 function addProject() {
+    console.log("Adding a new project...");
     const projectName = prompt("Enter project name:");
     if (projectName) {
         const newProject = { id: Date.now(), name: projectName, boards: [] };
+        window.projects.push(newProject);
+        saveProjects();
+        loadProjects();
+    } else {
+        console.log("Project creation cancelled or invalid name.");
+    }
+};
         window.projects.push(newProject);
         saveProjects();
         loadProjects();
