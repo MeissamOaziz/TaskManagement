@@ -1,77 +1,188 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Task Management Platform</title>
-    <link rel="stylesheet" href="Styles.css">
-    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Task Management Platform</title>
+  <link rel="stylesheet" href="Styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+  <style>
+    /* Sidebar (Navigation Pane) Styles */
+    .sidebar {
+      width: 300px;
+      background-color: #f8f9fa;
+      border-right: 1px solid #ddd;
+      padding: 10px;
+      box-sizing: border-box;
+      overflow-y: auto;
+    }
+    .sidebar h2 {
+      font-size: 20px;
+      margin-top: 0;
+    }
+    #projectList {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .project-card {
+      background-color: #fff;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      margin-bottom: 10px;
+      padding: 10px;
+      cursor: pointer;
+      transition: box-shadow 0.2s;
+    }
+    .project-card:hover {
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+    .project-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 5px;
+    }
+    .project-name {
+      font-size: 16px;
+      font-weight: bold;
+      flex-grow: 1;
+      padding: 2px 4px;
+    }
+    .project-name[contenteditable="true"] {
+      border-bottom: 1px dashed #ccc;
+    }
+    .add-board-btn {
+      background-color: #28a745;
+      color: #fff;
+      border: none;
+      padding: 4px 8px;
+      border-radius: 3px;
+      cursor: pointer;
+      margin-left: 10px;
+    }
+    .board-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .board-item {
+      padding: 4px 6px;
+      border-bottom: 1px solid #eee;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+    }
+    .board-name {
+      flex-grow: 1;
+      padding: 2px;
+    }
+    .board-name[contenteditable="true"] {
+      border-bottom: 1px dashed #ccc;
+    }
+    
+    /* Main Content Styles */
+    .main-content {
+      flex-grow: 1;
+      padding: 20px;
+      overflow-y: auto;
+    }
+    .board-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .board-header h2 {
+      margin: 0;
+    }
+    .add-btn {
+      cursor: pointer;
+    }
+    
+    /* Optional: Modal and other styles can remain as defined in your Styles.css */
+  </style>
 </head>
 <body>
-    <div class="app-container">
-        <!-- Sidebar Navigation -->
-        <aside class="sidebar">
-            <h2>Projects</h2>
-            <button id="addProjectBtn" class="add-btn">+ Add Project</button>
-            <ul id="projectList"></ul>
-        </aside>
+  <div class="app-container">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+      <h2>Projects</h2>
+      <!-- Project cards will be injected here by JavaScript -->
+      <ul id="projectList">
+        <!-- Example structure (injected dynamically):
+             <li class="project-card" data-project-id="...">
+               <div class="project-header">
+                 <span class="project-name" contenteditable="true">Project Name</span>
+                 <button class="add-board-btn">+</button>
+               </div>
+               <ul class="board-list">
+                 <li class="board-item" data-board-id="...">
+                   <span class="board-name" contenteditable="true">Board Name</span>
+                 </li>
+               </ul>
+             </li>
+        -->
+      </ul>
+      <button id="addProjectBtn" class="add-btn">+ Add Project</button>
+    </aside>
+    
+    <!-- Main Content -->
+    <main class="main-content">
+      <div class="board-header">
+        <h2 id="selectedProjectName">Select a Project</h2>
+        <button id="addTaskGroupBtn" class="add-btn">+ Create New Task Group</button>
+      </div>
+      
+      <!-- Task Group Section -->
+      <div class="task-group-section" id="taskGroupSection">
+        <!-- Task Groups and Tasks will be dynamically added here -->
+      </div>
+    </main>
+  </div>
+
+  <!-- Task Creation/Edit Form (Modal) -->
+  <div id="taskFormModal" class="modal">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <h3>Add/Edit Task</h3>
+      <form id="taskForm">
+        <label for="taskName">Task Name:</label>
+        <input type="text" id="taskName" name="taskName" required>
         
-        <!-- Main Content -->
-        <main class="main-content">
-            <div class="board-header">
-                <h2 id="selectedProjectName">Select a Project</h2>
-                <button id="addTaskGroupBtn" class="add-btn">+ Create New Task Group</button>
-            </div>
-            
-            <!-- Task Group Section -->
-            <div class="task-group-section" id="taskGroupSection">
-                <!-- Task Groups and Tasks will be dynamically added here -->
-            </div>
-        </main>
+        <label for="startDate">Start Date:</label>
+        <input type="date" id="startDate" name="startDate" required>
+        
+        <label for="dueDate">Due Date:</label>
+        <input type="date" id="dueDate" name="dueDate" required>
+        
+        <label for="progress">Progress:</label>
+        <select id="progress" name="progress" required>
+          <option value="New">New</option>
+          <option value="In Progress">In Progress</option>
+          <option value="Completed">Completed</option>
+        </select>
+        
+        <button type="submit">Save Task</button>
+      </form>
     </div>
+  </div>
 
-    <!-- Task Creation/Edit Form (Modal) -->
-    <div id="taskFormModal" class="modal">
-        <div class="modal-content">
-            <span class="close">&times;</span>
-            <h3>Add/Edit Task</h3>
-            <form id="taskForm">
-                <label for="taskName">Task Name:</label>
-                <input type="text" id="taskName" name="taskName" required>
-                
-                <label for="startDate">Start Date:</label>
-                <input type="date" id="startDate" name="startDate" required>
-                
-                <label for="dueDate">Due Date:</label>
-                <input type="date" id="dueDate" name="dueDate" required>
-                
-                <label for="progress">Progress:</label>
-                <select id="progress" name="progress" required>
-                    <option value="New">New</option>
-                    <option value="In Progress">In Progress</option>
-                    <option value="Completed">Completed</option>
-                </select>
-                
-                <button type="submit">Save Task</button>
-            </form>
+  <!-- Progress Options Customization Form (Modal) -->
+  <div id="progressOptionsModal" class="modal">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <h3>Customize Progress Options</h3>
+      <form id="progressOptionsForm">
+        <div id="progressOptionsList">
+          <!-- Progress options will be dynamically added here -->
         </div>
+        <button type="button" id="addProgressOptionBtn">+ Add Progress Option</button>
+        <button type="submit">Save Progress Options</button>
+      </form>
     </div>
+  </div>
 
-    <!-- Progress Options Customization Form (Modal) -->
-    <div id="progressOptionsModal" class="modal">
-        <div class="modal-content">
-            <span class="close">&times;</span>
-            <h3>Customize Progress Options</h3>
-            <form id="progressOptionsForm">
-                <div id="progressOptionsList">
-                    <!-- Progress options will be dynamically added here -->
-                </div>
-                <button type="button" id="addProgressOptionBtn">+ Add Progress Option</button>
-                <button type="submit">Save Progress Options</button>
-            </form>
-        </div>
-    </div>
-
-    <script src="script.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>
