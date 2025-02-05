@@ -29,15 +29,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Attach event listeners
     if (addProjectBtn) addProjectBtn.addEventListener('click', addProject);
-    if (addTaskGroupBtn) addTaskGroupBtn.addEventListener('click', () => {
-        if (currentBoardId) {
-            addTaskGroup(currentBoardId);
-        } else {
-            alert("Please select a board first.");
-        }
-    });
+    if (addTaskGroupBtn)
+        addTaskGroupBtn.addEventListener('click', () => {
+            if (currentBoardId) {
+                addTaskGroup(currentBoardId);
+            } else {
+                alert("Please select a board first.");
+            }
+        });
 
-    // Event delegation for dynamically added elements
+    // Event delegation for dynamically added elements (for adding tasks)
     document.addEventListener('click', (event) => {
         if (event.target.classList.contains('add-task-btn')) {
             openTaskFormModal(event.target.dataset.taskGroupId);
@@ -142,6 +143,22 @@ function addBoard(projectId) {
     }
 }
 
+// *** NEW FUNCTION: Add a new task group to a board ***
+function addTaskGroup(boardId) {
+    console.log("Adding a new task group...");
+    const taskGroupName = prompt("Enter task group name:");
+    if (taskGroupName) {
+        const project = window.projects.find(p => p.id == currentProjectId);
+        const board = project?.boards.find(b => b.id == boardId);
+        if (board) {
+            const newTaskGroup = { id: Date.now(), name: taskGroupName, tasks: [] };
+            board.taskGroups.push(newTaskGroup);
+            saveProjects();
+            loadTaskGroups(boardId); // Refresh the task groups UI
+        }
+    }
+}
+
 // Load boards for a selected project
 function loadBoards(projectId) {
     console.log("Loading boards for project:", projectId);
@@ -155,13 +172,7 @@ function loadBoards(projectId) {
                 boardItem.classList.add('board-item');
                 boardItem.textContent = board.name;
                 boardItem.onclick = () => selectBoard(board.id);
-
-                const taskGroupList = document.createElement('ul');
-                taskGroupList.classList.add('task-group-list');
-                taskGroupList.id = `task-groups-${board.id}`;
-                boardItem.appendChild(taskGroupList);
                 boardList.appendChild(boardItem);
-                loadTaskGroups(board.id);
             });
         }
     }
@@ -169,11 +180,11 @@ function loadBoards(projectId) {
 
 // Select a project
 function selectProject(projectId) {
-    currentProjectId = projectId; // Set the current project ID
+    currentProjectId = projectId;
     const selectedProject = window.projects.find(p => p.id === projectId);
     if (selectedProject) {
         document.getElementById('selectedProjectName').textContent = selectedProject.name;
-        loadBoards(projectId); // Load boards for the selected project
+        loadBoards(projectId);
     }
 }
 
@@ -183,48 +194,32 @@ function selectBoard(boardId) {
     loadTaskGroups(boardId);
 }
 
-// Load task groups for a selected board
+// Load task groups for a selected board into the element with id "taskGroupSection"
 function loadTaskGroups(boardId) {
-    const taskGroupList = document.getElementById(`task-groups-${boardId}`);
-    if (taskGroupList) {
-        taskGroupList.innerHTML = ''; // Clear the existing list
+    const taskGroupSection = document.getElementById('taskGroupSection');
+    if (taskGroupSection) {
+        taskGroupSection.innerHTML = '';
         const board = window.projects
             .find(p => p.id === currentProjectId)
             ?.boards.find(b => b.id === boardId);
         if (board) {
             board.taskGroups.forEach(taskGroup => {
-                const taskGroupItem = document.createElement('li');
-                taskGroupItem.classList.add('task-group-item');
-                taskGroupItem.textContent = taskGroup.name;
-                taskGroupItem.onclick = () => selectTaskGroup(taskGroup.id);
-                taskGroupList.appendChild(taskGroupItem);
+                const taskGroupDiv = document.createElement('div');
+                taskGroupDiv.classList.add('task-group');
+                taskGroupDiv.dataset.taskGroupId = taskGroup.id; // For drag-and-drop
+                taskGroupDiv.innerHTML = `
+                    <h3>${taskGroup.name}</h3>
+                    <button class="add-task-btn" data-task-group-id="${taskGroup.id}">+ Add Task</button>
+                    <ul class="task-list"></ul>
+                `;
+                taskGroupSection.appendChild(taskGroupDiv);
+                loadTasks(taskGroup.id, taskGroupDiv.querySelector('.task-list'));
             });
+            enableDragAndDrop(); // Enable drag-and-drop after loading task groups
         }
     }
 }
-function enableDragAndDrop() {
-    document.querySelectorAll('.task-list').forEach(taskList => {
-        Sortable.create(taskList, {
-            group: 'tasks',
-            animation: 150,
-            onEnd: (event) => {
-                const taskGroupId = event.to.closest('.task-group').dataset.taskGroupId;
-                const project = window.projects.find(p => p.id === currentProjectId);
-                const board = project?.boards.find(b => b.id === currentBoardId);
-                const taskGroup = board?.taskGroups.find(tg => tg.id == taskGroupId);
-                if (taskGroup) {
-                    const taskId = event.item.dataset.taskId;
-                    const task = taskGroup.tasks.find(t => t.id == taskId);
-                    if (task) {
-                        taskGroup.tasks.splice(event.oldIndex, 1);
-                        taskGroup.tasks.splice(event.newIndex, 0, task);
-                        saveProjects();
-                    }
-                }
-            }
-        });
-    });
-}
+
 // Load tasks for a selected task group
 function loadTasks(taskGroupId, taskListElement) {
     const taskGroup = window.projects
@@ -236,6 +231,7 @@ function loadTasks(taskGroupId, taskListElement) {
         taskGroup.tasks.forEach(task => {
             const taskItem = document.createElement('li');
             taskItem.classList.add('task-item');
+            taskItem.dataset.taskId = task.id; // For drag-and-drop
             taskItem.textContent = task.name;
             taskListElement.appendChild(taskItem);
         });
@@ -253,7 +249,7 @@ function openTaskFormModal(taskGroupId) {
 
 // Save a new task
 function saveTask(event) {
-    event.preventDefault(); // Prevent form submission
+    event.preventDefault();
     const taskForm = document.getElementById('taskForm');
     const taskName = document.getElementById('taskName').value.trim();
     const startDate = document.getElementById('startDate').value;
@@ -282,59 +278,28 @@ function saveTask(event) {
         taskGroup.tasks = taskGroup.tasks || [];
         taskGroup.tasks.push(newTask);
         saveProjects();
-        loadTaskGroups(currentBoardId); // Refresh the task groups UI
+        loadTaskGroups(currentBoardId); // Refresh UI
         closeModal('taskFormModal');
     }
 }
 
-function enableDragAndDrop() {
-    document.querySelectorAll('.task-list').forEach(taskList => {
-        Sortable.create(taskList, {
-            group: 'tasks',
-            animation: 150,
-            onEnd: (event) => {
-                const taskGroupId = event.to.closest('.task-group').dataset.taskGroupId;
-                const project = window.projects.find(p => p.id === currentProjectId);
-                const board = project?.boards.find(b => b.id === currentBoardId);
-                const taskGroup = board?.taskGroups.find(tg => tg.id == taskGroupId);
-                if (taskGroup) {
-                    const taskId = event.item.dataset.taskId;
-                    const task = taskGroup.tasks.find(t => t.id == taskId);
-                    if (task) {
-                        taskGroup.tasks.splice(event.oldIndex, 1);
-                        taskGroup.tasks.splice(event.newIndex, 0, task);
-                        saveProjects();
-                    }
-                }
-            }
-        });
-    });
-}
-
-// Close a modal
-function closeModal(modalId) {
-    document.getElementById(modalId).style.display = 'none';
-}
-// Enable drag-and-drop for task groups and tasks
+// Enable drag-and-drop for both task groups and tasks
 function enableDragAndDrop() {
     const taskGroupSection = document.getElementById('taskGroupSection');
     if (taskGroupSection) {
-        // Make task groups draggable
+        // Enable dragging for task groups
         Sortable.create(taskGroupSection, {
-            group: 'task-groups', // Allow dragging between task groups
-            animation: 150, // Smooth animation
-            handle: '.task-group', // Drag handle
+            group: 'task-groups',
+            animation: 150,
+            handle: '.task-group',
             onEnd: (event) => {
-                // Update the order of task groups in the data
                 const project = window.projects.find(p => p.id === currentProjectId);
                 const board = project?.boards.find(b => b.id === currentBoardId);
                 if (board) {
                     const taskGroupId = event.item.dataset.taskGroupId;
                     const taskGroup = board.taskGroups.find(tg => tg.id == taskGroupId);
                     if (taskGroup) {
-                        // Remove the task group from its old position
                         board.taskGroups.splice(event.oldIndex, 1);
-                        // Insert the task group at its new position
                         board.taskGroups.splice(event.newIndex, 0, taskGroup);
                         saveProjects();
                     }
@@ -342,13 +307,12 @@ function enableDragAndDrop() {
             }
         });
 
-        // Make tasks draggable within task groups
+        // Enable dragging for tasks within task groups
         document.querySelectorAll('.task-list').forEach(taskList => {
             Sortable.create(taskList, {
-                group: 'tasks', // Allow dragging between task lists
-                animation: 150, // Smooth animation
+                group: 'tasks',
+                animation: 150,
                 onEnd: (event) => {
-                    // Update the order of tasks in the data
                     const taskGroupId = event.to.closest('.task-group').dataset.taskGroupId;
                     const project = window.projects.find(p => p.id === currentProjectId);
                     const board = project?.boards.find(b => b.id === currentBoardId);
@@ -357,9 +321,7 @@ function enableDragAndDrop() {
                         const taskId = event.item.dataset.taskId;
                         const task = taskGroup.tasks.find(t => t.id == taskId);
                         if (task) {
-                            // Remove the task from its old position
                             taskGroup.tasks.splice(event.oldIndex, 1);
-                            // Insert the task at its new position
                             taskGroup.tasks.splice(event.newIndex, 0, task);
                             saveProjects();
                         }
@@ -370,46 +332,7 @@ function enableDragAndDrop() {
     }
 }
 
-// Call enableDragAndDrop after loading task groups
-function loadTaskGroups(boardId) {
-    const taskGroupSection = document.getElementById('taskGroupSection');
-    if (taskGroupSection) {
-        taskGroupSection.innerHTML = '';
-        const board = window.projects
-            .find(p => p.id === currentProjectId)
-            ?.boards.find(b => b.id === boardId);
-        if (board) {
-            board.taskGroups.forEach(taskGroup => {
-                const taskGroupDiv = document.createElement('div');
-                taskGroupDiv.classList.add('task-group');
-                taskGroupDiv.dataset.taskGroupId = taskGroup.id; // Add dataset for drag-and-drop
-                taskGroupDiv.innerHTML = `
-                    <h3>${taskGroup.name}</h3>
-                    <button class="add-task-btn" data-task-group-id="${taskGroup.id}">+ Add Task</button>
-                    <ul class="task-list"></ul>
-                `;
-                taskGroupSection.appendChild(taskGroupDiv);
-                loadTasks(taskGroup.id, taskGroupDiv.querySelector('.task-list'));
-            });
-            enableDragAndDrop(); // Enable drag-and-drop after loading task groups
-        }
-    }
-}
-
-// Load tasks for a selected task group
-function loadTasks(taskGroupId, taskListElement) {
-    const taskGroup = window.projects
-        .find(p => p.id === currentProjectId)
-        ?.boards.find(b => b.id === currentBoardId)
-        ?.taskGroups.find(tg => tg.id === taskGroupId);
-    if (taskGroup && taskListElement) {
-        taskListElement.innerHTML = '';
-        taskGroup.tasks.forEach(task => {
-            const taskItem = document.createElement('li');
-            taskItem.classList.add('task-item');
-            taskItem.dataset.taskId = task.id; // Add dataset for drag-and-drop
-            taskItem.textContent = task.name;
-            taskListElement.appendChild(taskItem);
-        });
-    }
+// Close a modal
+function closeModal(modalId) {
+    document.getElementById(modalId).style.display = 'none';
 }
