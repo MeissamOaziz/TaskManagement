@@ -202,6 +202,29 @@ function loadTaskGroups(boardId) {
         }
     }
 }
+function enableDragAndDrop() {
+    document.querySelectorAll('.task-list').forEach(taskList => {
+        Sortable.create(taskList, {
+            group: 'tasks',
+            animation: 150,
+            onEnd: (event) => {
+                const taskGroupId = event.to.closest('.task-group').dataset.taskGroupId;
+                const project = window.projects.find(p => p.id === currentProjectId);
+                const board = project?.boards.find(b => b.id === currentBoardId);
+                const taskGroup = board?.taskGroups.find(tg => tg.id == taskGroupId);
+                if (taskGroup) {
+                    const taskId = event.item.dataset.taskId;
+                    const task = taskGroup.tasks.find(t => t.id == taskId);
+                    if (task) {
+                        taskGroup.tasks.splice(event.oldIndex, 1);
+                        taskGroup.tasks.splice(event.newIndex, 0, task);
+                        saveProjects();
+                    }
+                }
+            }
+        });
+    });
+}
 // Load tasks for a selected task group
 function loadTasks(taskGroupId, taskListElement) {
     const taskGroup = window.projects
@@ -225,7 +248,6 @@ function openTaskFormModal(taskGroupId) {
     const taskForm = document.getElementById('taskForm');
     taskForm.dataset.taskGroupId = taskGroupId;
     taskFormModal.style.display = 'flex';
-
     document.getElementById('taskForm').addEventListener('submit', saveTask);
 }
 
